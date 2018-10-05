@@ -1,0 +1,5 @@
+C:\Users\rafa_\Documents\GitHub\nhibernate\nhibernate-core\benchmarks\src\NHibernate.Benchmarks\bin\Debug\netcoreapp2.2\NHibernate.dll
+C:\Users\rafa_\Documents\GitHub\nhibernate\nhibernate-core\benchmarks\src\NHibernate.Benchmarks\obj\Debug\netcoreapp2.2\NHibernate.Benchmarks.csprojAssemblyReference.cache
+C:\Users\rafa_\Documents\GitHub\nhibernate\nhibernate-core\benchmarks\src\NHibernate.Benchmarks\obj\Debug\netcoreapp2.2\NHibernate.Benchmarks.csproj.CoreCompileInputs.cache
+C:\Users\rafa_\Documents\GitHub\nhibernate\nhibernate-core\benchmarks\src\NHibernate.Benchmarks\obj\Debug\netcoreapp2.2\NHibernate.Benchmarks.AssemblyInfoInputs.cache
+C:\Users\rafa_\Documents\GitHub\nhibernate\nhibernate-core\benchmarks\src\NHibernate.Benchmarks\obj\Debug\netcoreapp2.2\NHibernate.Benchmarks.AssemblyInfo.cs
