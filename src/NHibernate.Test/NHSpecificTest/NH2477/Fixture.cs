@@ -1,70 +1,58 @@
-using System;
 using System.Linq;
 using NHibernate.Cfg.MappingSchema;
-using NHibernate.Linq;
+using NHibernate.Criterion;
 using NHibernate.Mapping.ByCode;
+using NHibernate.Test.Linq;
 using NUnit.Framework;
 
 namespace NHibernate.Test.NHSpecificTest.NH2477
 {
-	public class Something
-	{
-		public virtual int Id { get; set; }
-		public virtual string Name { get; set; }
-	}
-
-	[TestFixture, Ignore("Not fixed yet.")]
-	public class Fixture: TestCaseMappingByCode
+	[TestFixture]
+	public class Fixture : TestCaseMappingByCode
 	{
 		protected override HbmMapping GetMappings()
 		{
 			var mapper = new ConventionModelMapper();
-			mapper.BeforeMapClass += (t, mi, map)=> map.Id(idm=> idm.Generator(Generators.Native));
-			return mapper.CompileMappingFor(new[] { typeof(Something) });
+			mapper.BeforeMapClass += (t, mi, map) => map.Id(idm => idm.Generator(Generators.Native));
+			return mapper.CompileMappingFor(new[] {typeof(Entity)});
 		}
 
-		private class Scenario : IDisposable
+		protected override void OnSetUp()
 		{
-			private readonly ISessionFactory factory;
-
-			public Scenario(ISessionFactory factory)
+			using (ISession session = OpenSession())
 			{
-				this.factory = factory;
-				using (var session = factory.OpenSession())
-				using (session.BeginTransaction())
+				for (int i = 0; i < 5; i++)
 				{
-					for (int i = 0; i < 5; i++)
-					{
-						session.Persist(new Something { Name = i.ToString() });
-					}
-					session.Transaction.Commit();
+					session.Save(
+						new Entity
+						{
+							Name = i.ToString()
+						});
 				}
+
+				session.Flush();
 			}
+		}
 
-			public void Dispose()
+		protected override void OnTearDown()
+		{
+			using (ISession session = OpenSession())
 			{
-				using (var session = factory.OpenSession())
-				using (session.BeginTransaction())
-				{
-					session.CreateQuery("delete from Something").ExecuteUpdate();
-					session.Transaction.Commit();
-				}
+				session.Delete($"from {nameof(Entity)}");
+				session.Flush();
 			}
 		}
 
 		[Test]
 		public void WhenTakeBeforeCountShouldApplyTake()
 		{
-			using (new Scenario(Sfi))
+			using (ISession session = OpenSession())
 			{
-				using (var session = Sfi.OpenSession())
-				using (session.BeginTransaction())
-				{
-					// This is another case where we have to work with subqueries and we have to write a specific query rewriter for Skip/Take instead flat the query in QueryReferenceExpressionFlattener
-					//var actual = session.CreateQuery("select count(s) from Something s where s in (from Something take 3)").UniqueResult<long>();
-					var actual = session.Query<Something>().Take(3).Count();
-					Assert.That(actual, Is.EqualTo(3));
-				}
+				var actual = session.Query<Entity>()
+										.Take(3)
+										.AsEnumerable()
+										.Count();
+				Assert.That(actual, Is.EqualTo(3));
 			}
 		}
 	}
