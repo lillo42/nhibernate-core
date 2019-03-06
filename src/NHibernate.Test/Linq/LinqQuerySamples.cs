@@ -1319,6 +1319,20 @@ namespace NHibernate.Test.Linq
 
 			ObjectDumper.Write(q);
 		}
+		
+		[Category("JOIN")]
+		[Test(Description = "This sample shows how to construct a join where one side is a nullable string and the other side a not nullable guid.")]
+		public void DLinqJoin11()
+		{
+			var q =
+				from o in db.Orders
+				join s in db.Shippers
+					on o.ShippedTo equals s.Reference.ToString()
+				where o.ShippedTo != null
+				select o.OrderId;
+
+			ObjectDumper.Write(q);
+		}
 
 		[Category("JOIN")]
 		[Test(Description = "This sample uses foreign key navigation in the " +
