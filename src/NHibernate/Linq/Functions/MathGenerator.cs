@@ -55,7 +55,7 @@ namespace NHibernate.Linq.Functions
 
 				ReflectHelper.GetMethodDefinition(() => Math.Pow(default(double), default(double))),
 
-#if NETCOREAPP2_0
+#if NETCOREAPP3_0
 				ReflectHelper.GetMethodDefinition(() => MathF.Sin(default(float))),
 				ReflectHelper.GetMethodDefinition(() => MathF.Cos(default(float))),
 				ReflectHelper.GetMethodDefinition(() => MathF.Tan(default(float))),

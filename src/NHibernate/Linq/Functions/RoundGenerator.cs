@@ -21,7 +21,7 @@ namespace NHibernate.Linq.Functions
 				ReflectHelper.GetMethodDefinition(() => decimal.Round(default(decimal))),
 				ReflectHelper.GetMethodDefinition(() => decimal.Round(default(decimal), default(int))),
 
-#if NETCOREAPP2_0
+#if NETCOREAPP3_0
 				ReflectHelper.GetMethodDefinition(() => MathF.Round(default(float))),
 				ReflectHelper.GetMethodDefinition(() => MathF.Round(default(float), default(int))),
 #endif

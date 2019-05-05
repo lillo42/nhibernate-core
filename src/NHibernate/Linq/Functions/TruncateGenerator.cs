@@ -18,7 +18,7 @@ namespace NHibernate.Linq.Functions
 				ReflectHelper.GetMethodDefinition(() => Math.Truncate(default(double))),
 				ReflectHelper.GetMethodDefinition(() => decimal.Truncate(default(decimal))),
 				
-#if NETCOREAPP2_0
+#if NETCOREAPP3_0
 				ReflectHelper.GetMethodDefinition(() => MathF.Truncate(default(float))),
 #endif
 			};

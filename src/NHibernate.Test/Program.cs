@@ -1,4 +1,4 @@
-﻿#if NETCOREAPP2_0
+﻿#if NETCOREAPP3_0
 namespace NHibernate.Test
 {
 	public class Program

@@ -1,4 +1,4 @@
-#if NETCOREAPP2_0
+#if NETCOREAPP3_0
 using System;
 using System.Linq;
 using System.Linq.Expressions;

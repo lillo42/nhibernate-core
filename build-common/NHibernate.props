@@ -12,8 +12,8 @@
     <AssemblyVersion>$(VersionMajor).$(VersionMinor).0.0</AssemblyVersion>
     <FileVersion>$(VersionPrefix).0</FileVersion>
 
-    <NhAppTargetFrameworks Condition ="$(NhAppTargetFrameworks) == ''">net461;netcoreapp2.0</NhAppTargetFrameworks>
-    <NhLibTargetFrameworks Condition ="$(NhLibTargetFrameworks) == ''">net461;netcoreapp2.0;netstandard2.0</NhLibTargetFrameworks>
+    <NhAppTargetFrameworks Condition ="$(NhAppTargetFrameworks) == ''">net461;netcoreapp3.0</NhAppTargetFrameworks>
+    <NhLibTargetFrameworks Condition ="$(NhLibTargetFrameworks) == ''">net461;netcoreapp3.0;netstandard2.0</NhLibTargetFrameworks>
     <NhNetFx>false</NhNetFx>
     <NhNetFx Condition="$(TargetFramework.StartsWith('net4'))">true</NhNetFx>
     <DefineConstants Condition="$(NhNetFx) AND $(NhVbNet) == ''" >NETFX;$(DefineConstants)</DefineConstants>
