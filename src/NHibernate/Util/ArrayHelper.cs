@@ -83,18 +83,18 @@ namespace NHibernate.Util
 
 		public static string ToString(object[] array)
 		{
-			StringBuilder sb = new StringBuilder();
-			sb.Append("[");
+			var sb = PooledStringBuilder.GetInstance();
+			sb.Builder.Append("[");
 			for (int i = 0; i < array.Length; i++)
 			{
-				sb.Append(array[i]);
+				sb.Builder.Append(array[i]);
 				if (i < array.Length - 1)
 				{
-					sb.Append(",");
+					sb.Builder.Append(",");
 				}
 			}
-			sb.Append("]");
-			return sb.ToString();
+			sb.Builder.Append("]");
+			return sb.ToStringAndFree();
 		}
 
 

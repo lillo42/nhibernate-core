@@ -16,9 +16,9 @@ namespace NHibernate.Hql.Ast.ANTLR.Util
 
 		public static string GetPathText(IASTNode n)
 		{
-			StringBuilder buf = new StringBuilder();
+			var buf = PooledStringBuilder.GetInstance();
 			GetPathText(buf, n);
-			return buf.ToString();
+			return buf.ToStringAndFree();
 		}
 
 		private static void GetPathText(StringBuilder buf, IASTNode n)
@@ -48,11 +48,11 @@ namespace NHibernate.Hql.Ast.ANTLR.Util
 		/// <returns>The list representation of the tree.</returns>
 		public static string GetDebugstring(IASTNode n)
 		{
-			StringBuilder buf = new StringBuilder();
-			buf.Append("[ ");
-			buf.Append((n == null) ? "{null}" : n.ToStringTree());
-			buf.Append(" ]");
-			return buf.ToString();
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append("[ ");
+			buf.Builder.Append((n == null) ? "{null}" : n.ToStringTree());
+			buf.Builder.Append(" ]");
+			return buf.ToStringAndFree();
 		}
 
 		/// <summary>

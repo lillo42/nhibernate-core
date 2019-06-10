@@ -76,14 +76,14 @@ namespace NHibernate.Dialect
 				result.Add("TOP (" + int.MaxValue + ") ");
 			}
 
-			var sb = new StringBuilder();
+			var sb = PooledStringBuilder.GetInstance();;
 			foreach (var column in sqlQuery.SelectColumns)
 			{
-				if (sb.Length > 0) sb.Append(", ");
-				sb.Append(column.Alias);
+				if (sb.Length > 0) sb.Builder.Append(", ");
+				sb.Builder.Append(column.Alias);
 			}
 
-			result.Add(sb.ToString());
+			result.Add(sb.ToStringAndFree());
 		}
 
 		private static void BuildFromClauseForPagingQuery(MsSqlSelectParser sqlQuery, SqlStringBuilder result)

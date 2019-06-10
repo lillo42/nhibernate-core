@@ -1023,14 +1023,14 @@ namespace NHibernate.Cfg
 			}
 			if (filterNames.Count > 0)
 			{
-				var message = new StringBuilder();
-				message.Append("filter-def for filter named ");
+				var message = PooledStringBuilder.GetInstance();
+				message.Builder.Append("filter-def for filter named ");
 				foreach (var filterName in filterNames)
 				{
-					message.AppendLine(filterName);
+					message.Builder.AppendLine(filterName);
 				}
-				message.AppendLine("was not found.");
-				throw new MappingException(message.ToString());
+				message.Builder.AppendLine("was not found.");
+				throw new MappingException(message.ToStringAndFree());
 			}
 
 			// check filter-def without reference

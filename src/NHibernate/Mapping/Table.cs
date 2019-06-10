@@ -634,8 +634,9 @@ namespace NHibernate.Mapping
 		public string[] SqlAlterStrings(Dialect.Dialect dialect, IMapping p, ITableMetadata tableInfo, string defaultCatalog,
 										string defaultSchema)
 		{
-			StringBuilder root =
-				new StringBuilder("alter table ").Append(GetQualifiedName(dialect, defaultCatalog, defaultSchema)).Append(' ').
+			var root =PooledStringBuilder.GetInstance();
+			
+			root.Builder.Append("alter table ").Append(GetQualifiedName(dialect, defaultCatalog, defaultSchema)).Append(' ').
 					Append(dialect.AddColumnString);
 
 			var results = new List<string>(ColumnSpan);
@@ -649,22 +650,22 @@ namespace NHibernate.Mapping
 				}
 
 				// the column doesnt exist at all.
-				StringBuilder alter =
-					new StringBuilder(root.ToString()).Append(' ').Append(column.GetQuotedName(dialect)).Append(' ').Append(
+				var alter = PooledStringBuilder.GetInstance();
+				alter.Builder.Append(root.Builder.ToString()).Append(' ').Append(column.GetQuotedName(dialect)).Append(' ').Append(
 						column.GetSqlType(dialect, p));
 
 				string defaultValue = column.DefaultValue;
 				if (!string.IsNullOrEmpty(defaultValue))
 				{
-					alter.Append(" default ").Append(defaultValue);
+					alter.Builder.Append(" default ").Append(defaultValue);
 
 					if (column.IsNullable)
 					{
-						alter.Append(dialect.NullColumnString);
+						alter.Builder.Append(dialect.NullColumnString);
 					}
 					else
 					{
-						alter.Append(" not null");
+						alter.Builder.Append(" not null");
 					}
 				}
 
@@ -672,24 +673,25 @@ namespace NHibernate.Mapping
 										   && (!column.IsNullable || dialect.SupportsNullInUnique);
 				if (useUniqueConstraint)
 				{
-					alter.Append(" unique");
+					alter.Builder.Append(" unique");
 				}
 
 				if (column.HasCheckConstraint && dialect.SupportsColumnCheck)
 				{
-					alter.Append(" check(").Append(column.CheckConstraint).Append(") ");
+					alter.Builder.Append(" check(").Append(column.CheckConstraint).Append(") ");
 				}
 
 				string columnComment = column.Comment;
 				if (columnComment != null)
 				{
-					alter.Append(dialect.GetColumnComment(columnComment));
+					alter.Builder.Append(dialect.GetColumnComment(columnComment));
 				}
 
-				alter.Append(dialect.AddColumnSuffixString);
-				results.Add(alter.ToString());
+				alter.Builder.Append(dialect.AddColumnSuffixString);
+				results.Add(alter.ToStringAndFree());
 			}
 
+			root.Free();
 			return results.ToArray();
 		}
 
@@ -951,19 +953,19 @@ namespace NHibernate.Mapping
 				string tableName = GetQualifiedName(dialect, defaultCatalog, defaultSchema);
 				if (!string.IsNullOrEmpty(comment))
 				{
-					StringBuilder buf =
-						new StringBuilder().Append("comment on table ").Append(tableName).Append(" is '").Append(comment).Append("'");
-					comments.Add(buf.ToString());
+					var buf = PooledStringBuilder.GetInstance();
+						buf.Builder.Append("comment on table ").Append(tableName).Append(" is '").Append(comment).Append("'");
+					comments.Add(buf.ToStringAndFree());
 				}
 				foreach (Column column in ColumnIterator)
 				{
 					string columnComment = column.Comment;
 					if (columnComment != null)
 					{
-						StringBuilder buf =
-							new StringBuilder().Append("comment on column ").Append(tableName).Append('.').Append(
+						var buf =PooledStringBuilder.GetInstance();
+						buf.Builder.Append("comment on column ").Append(tableName).Append('.').Append(
 								column.GetQuotedName(dialect)).Append(" is '").Append(columnComment).Append("'");
-						comments.Add(buf.ToString());
+						comments.Add(buf.ToStringAndFree());
 					}
 				}
 			}
@@ -1002,17 +1004,18 @@ namespace NHibernate.Mapping
 
 		public override string ToString()
 		{
-			StringBuilder buf = new StringBuilder().Append(GetType().FullName).Append('(');
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append(GetType().FullName).Append('(');
 			if (Catalog != null)
 			{
-				buf.Append(Catalog + ".");
+				buf.Builder.Append(Catalog + ".");
 			}
 			if (Schema != null)
 			{
-				buf.Append(Schema + ".");
+				buf.Builder.Append(Schema + ".");
 			}
-			buf.Append(Name).Append(')');
-			return buf.ToString();
+			buf.Builder.Append(Name).Append(')');
+			return buf.ToStringAndFree();
 		}
 
 		public IEnumerable<string> ValidateColumns(Dialect.Dialect dialect, IMapping mapping, ITableMetadata tableInfo)

@@ -278,15 +278,15 @@ namespace NHibernate.Dialect
 			// SQL Server Compact doesn't support Schemas. So join schema name and table name with underscores
 			// similar to the SQLLite dialect.
 			
-			var qualifiedName = new StringBuilder();
+			var qualifiedName = PooledStringBuilder.GetInstance();;
 			bool quoted = false;
 
 			if (!string.IsNullOrEmpty(catalog))
 			{
-				qualifiedName.Append(catalog).Append(StringHelper.Dot);
+				qualifiedName.Builder.Append(catalog).Append(StringHelper.Dot);
 			}
 
-			var tableName = new StringBuilder();
+			var tableName = PooledStringBuilder.GetInstance();;
 			if (!string.IsNullOrEmpty(schema))
 			{
 				if (schema.StartsWith(OpenQuote))
@@ -299,7 +299,7 @@ namespace NHibernate.Dialect
 					schema = schema.Substring(0, schema.Length - 1);
 					quoted = true;
 				}
-				tableName.Append(schema).Append(StringHelper.Underscore);
+				tableName.Builder.Append(schema).Append(StringHelper.Underscore);
 			}
 
 			if (table.StartsWith(OpenQuote))
@@ -313,10 +313,12 @@ namespace NHibernate.Dialect
 				quoted = true;
 			}
 
-			string name = tableName.Append(table).ToString();
+			tableName.Builder.Append(table);
+			string name = tableName.ToStringAndFree();
 			if (quoted)
 				name = OpenQuote + name + CloseQuote;
-			return qualifiedName.Append(name).ToString();
+			qualifiedName.Builder.Append(name);
+			return qualifiedName.ToStringAndFree();
 		}
 
 		private static int GetAfterSelectInsertPoint(SqlString sql)

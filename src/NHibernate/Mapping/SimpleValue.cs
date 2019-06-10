@@ -174,16 +174,16 @@ namespace NHibernate.Mapping
 
 			if (rootClass != null)
 			{
-				StringBuilder tables = new StringBuilder();
+				var tables = PooledStringBuilder.GetInstance();;
 				bool commaNeeded = false;
 				foreach (Table identityTable in rootClass.IdentityTables)
 				{
 					if (commaNeeded)
-						tables.Append(StringHelper.CommaSpace);
+						tables.Builder.Append(StringHelper.CommaSpace);
 					commaNeeded = true;
-					tables.Append(identityTable.GetQuotedName(dialect));
+					tables.Builder.Append(identityTable.GetQuotedName(dialect));
 				}
-				@params[PersistentIdGeneratorParmsNames.Tables] = tables.ToString();
+				@params[PersistentIdGeneratorParmsNames.Tables] = tables.ToStringAndFree();
 			}
 			else
 			{

@@ -653,19 +653,20 @@ namespace NHibernate.Dialect
 		/// <returns></returns>
 		public virtual string GetDropTableString(string tableName)
 		{
-			var buf = new StringBuilder("drop table ");
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append("drop table ");
 			if (SupportsIfExistsBeforeTableName)
 			{
-				buf.Append("if exists ");
+				buf.Builder.Append("if exists ");
 			}
 
-			buf.Append(tableName).Append(CascadeConstraintsString);
+			buf.Builder.Append(tableName).Append(CascadeConstraintsString);
 
 			if (SupportsIfExistsAfterTableName)
 			{
-				buf.Append(" if exists");
+				buf.Builder.Append(" if exists");
 			}
-			return buf.ToString();
+			return buf.ToStringAndFree();
 		}
 
 		#region Temporary table support
@@ -1775,17 +1776,19 @@ namespace NHibernate.Dialect
 
 		public virtual string Qualify(string catalog, string schema, string name)
 		{
-			StringBuilder qualifiedName = new StringBuilder();
+			var qualifiedName = PooledStringBuilder.GetInstance();
 
 			if (!string.IsNullOrEmpty(catalog))
 			{
-				qualifiedName.Append(catalog).Append(StringHelper.Dot);
+				qualifiedName.Builder.Append(catalog).Append(StringHelper.Dot);
 			}
 			if (!string.IsNullOrEmpty(schema))
 			{
-				qualifiedName.Append(schema).Append(StringHelper.Dot);
+				qualifiedName.Builder.Append(schema).Append(StringHelper.Dot);
 			}
-			return qualifiedName.Append(name).ToString();
+			qualifiedName.Builder.Append(name);
+
+			return qualifiedName.ToStringAndFree();
 		}
 
 		/// <summary>

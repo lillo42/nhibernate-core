@@ -17,14 +17,17 @@ namespace NHibernate.Hql
 			try
 			{
 				JoinFragment join = joinSequence.ToJoinFragment(enabledFilters, true);
-				return new StringBuilder()
-					.Append("select ")
+				var buf = PooledStringBuilder.GetInstance();
+				
+				buf.Builder.Append("select ")
 					.Append(string.Join(", ", columns))
 					.Append(" from ")
 					.Append(join.ToFromFragmentString.Substring(2)) // remove initial ", "
 					.Append(" where ")
 					.Append(join.ToWhereFragmentString.Substring(5)) // remove initial " and "
-					.ToString();
+					;
+
+				return buf.ToStringAndFree();
 			}
 			catch (MappingException me)
 			{

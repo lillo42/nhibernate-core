@@ -146,14 +146,16 @@ namespace NHibernate.Mapping
 			var schema = Table.GetQuotedSchema(dialect, defaultSchema);
 			var tableName = Table.GetQuotedName(dialect);
 
-			return new StringBuilder()
-						.AppendLine(dialect.GetIfExistsDropConstraint(catalog, schema, tableName, Name))
+			var buf = PooledStringBuilder.GetInstance();
+			
+			buf.Builder.AppendLine(dialect.GetIfExistsDropConstraint(catalog, schema, tableName, Name))
 						.Append("alter table ")
 						.Append(Table.GetQualifiedName(dialect, defaultCatalog, defaultSchema))
 						.Append(" drop constraint ")
 						.AppendLine(Name)
-						.Append(dialect.GetIfExistsDropConstraintEnd(catalog, schema, tableName, Name))
-						.ToString();
+						.Append(dialect.GetIfExistsDropConstraintEnd(catalog, schema, tableName, Name));
+
+			return buf.ToStringAndFree();
 		}
 
 		/// <summary>
@@ -173,10 +175,13 @@ namespace NHibernate.Mapping
 				return null;
 			}
 
-			StringBuilder buf = new StringBuilder("alter table ")
+			var buf = PooledStringBuilder.GetInstance();
+			
+			buf.Builder.Append("alter table ")
 				.Append(Table.GetQualifiedName(dialect, defaultCatalog, defaultSchema))
 				.Append(SqlConstraintString(dialect, Name, defaultCatalog, defaultSchema));
-			return buf.ToString();
+			
+			return buf.ToStringAndFree();
 		}
 
 		#endregion

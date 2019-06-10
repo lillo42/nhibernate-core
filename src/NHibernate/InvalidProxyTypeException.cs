@@ -26,12 +26,13 @@ namespace NHibernate
 
 		private static string FormatMessage(IEnumerable<string> errors)
 		{
-			var result = new StringBuilder("The following types may not be used as proxies:");
+			var result = PooledStringBuilder.GetInstance();
+			result.Builder.Append("The following types may not be used as proxies:");
 			foreach (string error in errors)
 			{
-				result.Append('\n').Append(error);
+				result.Builder.Append('\n').Append(error);
 			}
-			return result.ToString();
+			return result.ToStringAndFree();
 		}
 
 		#region Serialization

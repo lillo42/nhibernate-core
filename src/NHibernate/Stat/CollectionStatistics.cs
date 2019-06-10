@@ -42,15 +42,16 @@ namespace NHibernate.Stat
 
 		public override string ToString()
 		{
-			return new StringBuilder()
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder
 				.Append("CollectionStatistics[")
 				.Append("loadCount=").Append(loadCount)
 				.Append(",fetchCount=").Append(fetchCount)
 				.Append(",recreateCount=").Append(recreateCount)
 				.Append(",removeCount=").Append(removeCount)
 				.Append(",updateCount=").Append(updateCount)
-				.Append(']').ToString();
-
+				.Append(']');
+			return buf.ToStringAndFree();
 		}
 	}
 }

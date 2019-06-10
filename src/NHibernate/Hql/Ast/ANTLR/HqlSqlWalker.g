@@ -312,9 +312,9 @@ joinType returns [int j]
 path returns [String p] 
 	: a=identifier { $p = $a.start.ToString();}
 	| ^(DOT x=path y=identifier) {
-			StringBuilder buf = new StringBuilder();
-			buf.Append($x.p).Append('.').Append($y.start.ToString());
-			$p = buf.ToString();
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append($x.p).Append('.').Append($y.start.ToString());
+			$p = buf.ToStringAndFree();
 		}
 	;
 

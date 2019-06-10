@@ -48,12 +48,14 @@ namespace NHibernate.Mapping
 			var schema = table.GetQuotedSchema(dialect, defaultSchema);
 			var tableName = table.GetQuotedName(dialect);
 
-			return new StringBuilder()
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder
 				.AppendLine(dialect.GetIfExistsDropConstraint(catalog, schema, tableName, name))
 				.Append("drop index ")
 				.AppendLine(StringHelper.Qualify(table.GetQualifiedName(dialect, defaultCatalog, defaultSchema), name))
-				.Append(dialect.GetIfExistsDropConstraintEnd(catalog, schema, tableName, name))
-				.ToString();
+				.Append(dialect.GetIfExistsDropConstraintEnd(catalog, schema, tableName, name));
+
+			return buf.ToStringAndFree();
 		}
 
 		/// <summary>

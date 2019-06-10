@@ -44,10 +44,10 @@ namespace NHibernate.Hql.Ast.ANTLR.Tree
 
 		public string GetDisplayText()
 		{
-			StringBuilder buf = new StringBuilder();
-			buf.Append("{").Append((_fromElement == null) ? "no fromElement" : _fromElement.GetDisplayText());
-			buf.Append("}");
-			return buf.ToString();
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append("{").Append((_fromElement == null) ? "no fromElement" : _fromElement.GetDisplayText());
+			buf.Builder.Append("}");
+			return buf.ToStringAndFree();
 		}
 
 		public abstract void Resolve(bool generateJoin, bool implicitJoin, string classAlias, IASTNode parent);

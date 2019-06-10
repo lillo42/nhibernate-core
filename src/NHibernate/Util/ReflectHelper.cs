@@ -592,19 +592,20 @@ namespace NHibernate.Util
 
 		private static string FormatConstructorNotFoundMessage(IEnumerable<IType> types)
 		{
-			var result = new StringBuilder("no constructor compatible with (");
+			var result = PooledStringBuilder.GetInstance();
+			result.Builder.Append("no constructor compatible with (");
 			bool first = true;
 			foreach (IType type in types)
 			{
 				if (!first)
 				{
-					result.Append(", ");
+					result.Builder.Append(", ");
 				}
 				first = false;
-				result.Append(type.ReturnedClass);
+				result.Builder.Append(type.ReturnedClass);
 			}
-			result.Append(") found in class: ");
-			return result.ToString();
+			result.Builder.Append(") found in class: ");
+			return result.ToStringAndFree();
 		}
 
 		/// <summary>

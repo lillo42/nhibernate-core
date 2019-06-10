@@ -350,25 +350,25 @@ namespace NHibernate.Hql.Ast.ANTLR.Tree
 				return ToString();
 			}
 
-			StringBuilder builder = new StringBuilder();
+			var builder = PooledStringBuilder.GetInstance();
 			if (!IsNil)
 			{
-				builder.Append("( ");
-				builder.Append(ToString());
+				builder.Builder.Append("( ");
+				builder.Builder.Append(ToString());
 			}
 
 			foreach (ASTNode child in _children)
 			{
-				builder.Append(' ');
-				builder.Append(child.ToStringTree());
+				builder.Builder.Append(' ');
+				builder.Builder.Append(child.ToStringTree());
 			}
 
 			if (!IsNil)
 			{
-				builder.Append(" )");
+				builder.Builder.Append(" )");
 			}
 
-			return builder.ToString();
+			return builder.ToStringAndFree();
 		}
 
 		public IEnumerator<IASTNode> GetEnumerator()

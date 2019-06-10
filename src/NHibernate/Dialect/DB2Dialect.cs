@@ -277,11 +277,12 @@ namespace NHibernate.Dialect
 
 		private static string GetRowNumber(SqlString sql)
 		{
-			return new StringBuilder()
+			var buf =PooledStringBuilder.GetInstance();
+			buf.Builder
 				.Append("rownumber() over(")
 				.Append(sql.SubstringStartingWithLast("order by"))
-				.Append(") as rownum, ")
-				.ToString();
+				.Append(") as rownum, ");
+			return buf.ToStringAndFree();
 		}
 
 		public override string ForUpdateString

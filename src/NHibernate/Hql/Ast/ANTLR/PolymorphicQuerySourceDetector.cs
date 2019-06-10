@@ -70,9 +70,9 @@ namespace NHibernate.Hql.Ast.ANTLR
 
 		private static string BuildPath(IASTNode node)
 		{
-			var sb = new StringBuilder();
+			var sb = PooledStringBuilder.GetInstance();
 			BuildPath(node, sb);
-			return sb.ToString();
+			return sb.ToStringAndFree();
 		}
 
 		private static void BuildPath(IASTNode node, StringBuilder sb)

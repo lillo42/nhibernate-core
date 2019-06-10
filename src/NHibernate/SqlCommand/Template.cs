@@ -72,15 +72,17 @@ namespace NHibernate.SqlCommand
 		                                               SQLFunctionRegistry functionRegistry)
 		{
 			//TODO: make this a bit nicer
-			string symbols = new StringBuilder()
-				.Append("=><!+-*/()',|&`")
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append("=><!+-*/()',|&`")
 				.Append(ParserHelper.Whitespace)
 				.Append(dialect.OpenQuote)
-				.Append(dialect.CloseQuote)
-				.ToString();
+				.Append(dialect.CloseQuote);
+
+			string symbols = buf.ToStringAndFree();
+			
 			StringTokenizer tokens = new StringTokenizer(sqlWhereString, symbols, true);
 
-			StringBuilder result = new StringBuilder();
+			var result = PooledStringBuilder.GetInstance();;
 			bool quoted = false;
 			bool quotedIdentifier = false;
 			bool beforeTable = false;
@@ -136,7 +138,7 @@ namespace NHibernate.SqlCommand
 
 						if (isOpenQuote && !inFromClause && !lastToken.EndsWith("."))
 						{
-							result.Append(placeholder).Append('.');
+							result.Builder.Append(placeholder).Append('.');
 						}
 					}
 
@@ -147,11 +149,11 @@ namespace NHibernate.SqlCommand
 
 					if (quotedOrWhitespace)
 					{
-						result.Append(token);
+						result.Builder.Append(token);
 					}
 					else if (beforeTable)
 					{
-						result.Append(token);
+						result.Builder.Append(token);
 						beforeTable = false;
 						afterFromTable = true;
 					}
@@ -159,18 +161,18 @@ namespace NHibernate.SqlCommand
 					{
 						if (!"as".Equals(lcToken))
 							afterFromTable = false;
-						result.Append(token);
+						result.Builder.Append(token);
 					}
 					else if (IsNamedParameter(token))
 					{
-						result.Append(token);
+						result.Builder.Append(token);
 					}
 					else if (
 						IsIdentifier(token, dialect) &&
 						!IsFunctionOrKeyword(lcToken, nextToken, dialect, functionRegistry)
 					)
 					{
-						result.Append(placeholder)
+						result.Builder.Append(placeholder)
 							  .Append('.')
 							  .Append(token);
 					}
@@ -185,7 +187,7 @@ namespace NHibernate.SqlCommand
 						{
 							beforeTable = true;
 						}
-						result.Append(token);
+						result.Builder.Append(token);
 					}
 
 					if ( //Yuck:
@@ -199,22 +201,24 @@ namespace NHibernate.SqlCommand
 					lastToken = token;
 				}
 			}
-			return result.ToString();
+			return result.ToStringAndFree();
 		}
 
 		public static string RenderOrderByStringTemplate(string sqlOrderByString, Dialect.Dialect dialect,
 		                                                 SQLFunctionRegistry functionRegistry)
 		{
 			//TODO: make this a bit nicer
-			string symbols = new StringBuilder()
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder
 				.Append("=><!+-*/()',|&`")
 				.Append(ParserHelper.Whitespace)
 				.Append(dialect.OpenQuote)
-				.Append(dialect.CloseQuote)
-				.ToString();
+				.Append(dialect.CloseQuote);
+
+			string symbols = buf.ToStringAndFree();
 			StringTokenizer tokens = new StringTokenizer(sqlOrderByString, symbols, true);
 
-			StringBuilder result = new StringBuilder();
+			var result = PooledStringBuilder.GetInstance();
 			bool quoted = false;
 			bool quotedIdentifier = false;
 
@@ -266,7 +270,7 @@ namespace NHibernate.SqlCommand
 
 						if (isOpenQuote)
 						{
-							result.Append(Placeholder).Append('.');
+							result.Builder.Append(Placeholder).Append('.');
 						}
 					}
 
@@ -277,24 +281,24 @@ namespace NHibernate.SqlCommand
 
 					if (quotedOrWhitespace)
 					{
-						result.Append(token);
+						result.Builder.Append(token);
 					}
 					else if (
 						IsIdentifier(token, dialect) &&
 						!IsFunctionOrKeyword(lcToken, nextToken, dialect, functionRegistry)
 					)
 					{
-						result.Append(Placeholder)
+						result.Builder.Append(Placeholder)
 							  .Append('.')
 							  .Append(token);
 					}
 					else
 					{
-						result.Append(token);
+						result.Builder.Append(token);
 					}
 				}
 			}
-			return result.ToString();
+			return result.ToStringAndFree();
 		}
 
 		internal static string ReplacePlaceholder(string template, string alias)

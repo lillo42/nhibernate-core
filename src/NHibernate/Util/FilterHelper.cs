@@ -48,9 +48,9 @@ namespace NHibernate.Util
 
 		public string Render(String alias, IDictionary<string, IFilter> enabledFilters)
 		{
-			StringBuilder buffer = new StringBuilder();
-			Render(buffer, alias, enabledFilters);
-			return buffer.ToString();
+			var buffer = PooledStringBuilder.GetInstance();
+			Render(buffer.Builder, alias, enabledFilters);
+			return buffer.ToStringAndFree();
 		}
 
 		public void Render(StringBuilder buffer, string alias, IDictionary<string, IFilter> enabledFilters)

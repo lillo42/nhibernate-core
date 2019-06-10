@@ -147,13 +147,13 @@ namespace NHibernate.Hql.Ast.ANTLR.Tree
 				// TODO: Replace this with a more elegant solution.
 				string[] idColumnNames = queryable.IdentifierColumnNames;
 
-				var buf = new StringBuilder();
+				var buf = PooledStringBuilder.GetInstance();
 				for (int i = 0; i < idColumnNames.Length; i++)
 				{
-					buf.Append(_fromElement.TableAlias).Append('.').Append(idColumnNames[i]);
-					if (i != idColumnNames.Length - 1) buf.Append(", ");
+					buf.Builder.Append(_fromElement.TableAlias).Append('.').Append(idColumnNames[i]);
+					if (i != idColumnNames.Length - 1) buf.Builder.Append(", ");
 				}
-				return buf.ToString();
+				return buf.ToStringAndFree();
 			}
 			else
 			{
@@ -175,18 +175,18 @@ namespace NHibernate.Hql.Ast.ANTLR.Tree
 		{
 			CheckInitialized();
 			string[] cols = GetPropertyMapping(Persister.Entity.EntityPersister.EntityID).ToColumns(TableAlias, Persister.Entity.EntityPersister.EntityID);
-			StringBuilder buf = new StringBuilder();
+			var buf = PooledStringBuilder.GetInstance();
 			// For property references generate <tablealias>.<columnname> as <projectionalias>
 			for (int j = 0; j < cols.Length; j++)
 			{
 				string column = cols[j];
 				if (j > 0)
 				{
-					buf.Append(", ");
+					buf.Builder.Append(", ");
 				}
-				buf.Append(column).Append(" as ").Append(NameGenerator.ScalarName(i, j));
+				buf.Builder.Append(column).Append(" as ").Append(NameGenerator.ScalarName(i, j));
 			}
-			return buf.ToString();
+			return buf.ToStringAndFree();
 		}
 
 

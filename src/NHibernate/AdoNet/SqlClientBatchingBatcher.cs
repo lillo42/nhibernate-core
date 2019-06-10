@@ -13,7 +13,7 @@ namespace NHibernate.AdoNet
 		private int _batchSize;
 		private int _totalExpectedRowsAffected;
 		private SqlClientSqlCommandSet _currentBatch;
-		private StringBuilder _currentBatchCommandsLog;
+		private PooledStringBuilder _currentBatchCommandsLog;
 		private readonly int _defaultTimeout;
 
 		public SqlClientBatchingBatcher(ConnectionManager connectionManager, IInterceptor interceptor)
@@ -27,7 +27,8 @@ namespace NHibernate.AdoNet
 			//the user change the logging configuration at runtime. Trying to put this
 			//behind an if(log.IsDebugEnabled) will cause a null reference exception 
 			//at that point.
-			_currentBatchCommandsLog = new StringBuilder().AppendLine("Batch commands:");
+			_currentBatchCommandsLog = PooledStringBuilder.GetInstance();
+			_currentBatchCommandsLog.Builder.AppendLine("Batch commands:");
 		}
 
 		public override int BatchSize
@@ -53,7 +54,7 @@ namespace NHibernate.AdoNet
 				lineWithParameters = sqlStatementLogger.GetCommandLineWithParameters(batchUpdate);
 				var formatStyle = sqlStatementLogger.DetermineActualStyle(FormatStyle.Basic);
 				lineWithParameters = formatStyle.Formatter.Format(lineWithParameters);
-				_currentBatchCommandsLog.Append("command ")
+				_currentBatchCommandsLog.Builder.Append("command ")
 					.Append(_currentBatch.CountOfCommands)
 					.Append(":")
 					.AppendLine(lineWithParameters);
@@ -79,7 +80,7 @@ namespace NHibernate.AdoNet
 				Prepare(_currentBatch.BatchCommand);
 				if (Factory.Settings.SqlStatementLogger.IsDebugEnabled)
 				{
-					Factory.Settings.SqlStatementLogger.LogBatchCommand(_currentBatchCommandsLog.ToString());
+					Factory.Settings.SqlStatementLogger.LogBatchCommand(_currentBatchCommandsLog.Builder.ToString());
 				}
 				int rowsAffected;
 				try
@@ -128,7 +129,9 @@ namespace NHibernate.AdoNet
 
 			if (Factory.Settings.SqlStatementLogger.IsDebugEnabled)
 			{
-				_currentBatchCommandsLog = new StringBuilder().AppendLine("Batch commands:");
+				_currentBatchCommandsLog.Free();
+				_currentBatchCommandsLog = PooledStringBuilder.GetInstance();
+				_currentBatchCommandsLog.Builder.AppendLine("Batch commands:");
 			}
 		}
 
@@ -151,6 +154,7 @@ namespace NHibernate.AdoNet
 		protected override void Dispose(bool isDisposing)
 		{
 			base.Dispose(isDisposing);
+			_currentBatchCommandsLog.Free();
 			// Prevent exceptions when closing the batch from hiding any original exception
 			// (We do not know here if this batch closing occurs after a failure or not.)
 			try

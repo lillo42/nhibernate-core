@@ -131,13 +131,13 @@ namespace NHibernate.Hql.Ast.ANTLR.Tree
 		/// <returns>The additional display text.</returns>
 		public string GetDisplayText()
 		{
-			var buf = new StringBuilder();
-			buf.Append("IntoClause{");
-			buf.Append("entityName=").Append(EntityName);
-			buf.Append(",tableName=").Append(TableName);
-			buf.Append(",columns={").Append(_columnSpec).Append("}");
-			buf.Append("}");
-			return buf.ToString();
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append("IntoClause{");
+			buf.Builder.Append("entityName=").Append(EntityName);
+			buf.Builder.Append(",tableName=").Append(TableName);
+			buf.Builder.Append(",columns={").Append(_columnSpec).Append("}");
+			buf.Builder.Append("}");
+			return buf.ToStringAndFree();
 		}
 
 		private void InitializeColumns()

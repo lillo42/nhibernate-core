@@ -93,8 +93,8 @@ namespace NHibernate.Stat
 
 		public override string ToString()
 		{
-			StringBuilder buf = new StringBuilder()
-				.Append("SecondLevelCacheStatistics[")
+			var buf = PooledStringBuilder.GetInstance();
+				buf.Builder.Append("SecondLevelCacheStatistics[")
 				.Append("hitCount=").Append(hitCount)
 				.Append(",missCount=").Append(missCount)
 				.Append(",putCount=").Append(putCount);
@@ -102,12 +102,12 @@ namespace NHibernate.Stat
 			//not sure if this would ever be null but wanted to be careful
 			if (cache != null)
 			{
-				buf.Append(",elementCountInMemory=").Append(ElementCountInMemory)
+				buf.Builder.Append(",elementCountInMemory=").Append(ElementCountInMemory)
 					.Append(",elementCountOnDisk=").Append(ElementCountOnDisk)
 					.Append(",sizeInMemory=").Append(SizeInMemory);
 			}
-			buf.Append(']');
-			return buf.ToString();
+			buf.Builder.Append(']');
+			return buf.ToStringAndFree();
 		}
 	}
 }

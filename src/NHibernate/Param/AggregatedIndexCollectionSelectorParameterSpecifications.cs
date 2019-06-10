@@ -56,14 +56,14 @@ namespace NHibernate.Param
 
 		private string CollectDisplayInfo() 
 		{
-			StringBuilder buffer = new StringBuilder();
+			var buffer = PooledStringBuilder.GetInstance();
 
 			foreach (IParameterSpecification spec in _paramSpecs)
 			{
-				buffer.Append(spec.RenderDisplayInfo());
+				buffer.Builder.Append(spec.RenderDisplayInfo());
 			}
 
-			return buffer.ToString();
+			return buffer.ToStringAndFree();
 		}
 	}
 }

@@ -58,24 +58,24 @@ namespace NHibernate.Id
 			parms.TryGetValue(PersistentIdGeneratorParmsNames.Schema, out schema);
 			parms.TryGetValue(PersistentIdGeneratorParmsNames.Catalog, out catalog);
 
-			StringBuilder buf = new StringBuilder();
+			PooledStringBuilder buf = PooledStringBuilder.GetInstance();
 			for (int i = 0; i < tables.Length; i++)
 			{
 				if (tables.Length > 1)
 				{
-					buf.Append("select ").Append(column).Append(" from ");
+					buf.Builder.Append("select ").Append(column).Append(" from ");
 				}
-				buf.Append(dialect.Qualify(catalog, schema, tables[i]));
+				buf.Builder.Append(dialect.Qualify(catalog, schema, tables[i]));
 				if (i < tables.Length - 1)
-					buf.Append(" union ");
+					buf.Builder.Append(" union ");
 			}
 			if (tables.Length > 1)
 			{
-				buf.Insert(0, "( ").Append(" ) ids_");
+				buf.Builder.Insert(0, "( ").Append(" ) ids_");
 				column = "ids_." + column;
 			}
 
-			var sqlTxt = string.Format("select max({0}) from {1}", column, buf);
+			var sqlTxt = string.Format("select max({0}) from {1}", column, buf.ToStringAndFree());
 			_sql = new SqlString(sqlTxt);
 		}
 

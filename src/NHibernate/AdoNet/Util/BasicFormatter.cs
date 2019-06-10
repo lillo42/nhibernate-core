@@ -71,7 +71,7 @@ namespace NHibernate.AdoNet.Util
 		{
 			private readonly List<bool> afterByOrFromOrSelects = new List<bool>();
 			private readonly List<int> parenCounts = new List<int>();
-			private readonly StringBuilder result = new StringBuilder();
+			private readonly PooledStringBuilder result;
 			private readonly IEnumerator<string> tokens;
 			private bool afterBeginBeforeEnd;
 			private bool afterBetween;
@@ -93,11 +93,12 @@ namespace NHibernate.AdoNet.Util
 			{
 				// TODO : some delimiter may depend from a specific Dialect/Drive (as ';' to separate multi query)
 				tokens = new StringTokenizer(sql, "()+*/-=<>'`\"[],;" + StringHelper.WhiteSpace, true).GetEnumerator();
+				result = PooledStringBuilder.GetInstance();
 			}
 
 			public string Perform()
 			{
-				result.Append(Initial);
+				result.Builder.Append(Initial);
 
 				while (tokens.MoveNext())
 				{
@@ -180,7 +181,7 @@ namespace NHibernate.AdoNet.Util
 						lastToken = lcToken;
 					}
 				}
-				return result.ToString();
+				return result.Builder.ToString();
 			}
 
 			private void StartingNewQuery()
@@ -270,7 +271,7 @@ namespace NHibernate.AdoNet.Util
 			{
 				if (!beginLine)
 				{
-					result.Append(" ");
+					result.Builder.Append(" ");
 				}
 			}
 
@@ -304,7 +305,7 @@ namespace NHibernate.AdoNet.Util
 
 			private void Out()
 			{
-				result.Append(token);
+				result.Builder.Append(token);
 			}
 
 			private void EndNewClause()
@@ -435,10 +436,10 @@ namespace NHibernate.AdoNet.Util
 
 			private void Newline()
 			{
-				result.Append("\n");
+				result.Builder.Append("\n");
 				for (int i = 0; i < indent; i++)
 				{
-					result.Append(IndentString);
+					result.Builder.Append(IndentString);
 				}
 				beginLine = true;
 			}
@@ -446,6 +447,7 @@ namespace NHibernate.AdoNet.Util
 			public void Dispose()
 			{
 				tokens.Dispose();
+				result.Free();
 			}
 		}
 

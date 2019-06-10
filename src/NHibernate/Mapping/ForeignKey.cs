@@ -89,14 +89,16 @@ namespace NHibernate.Mapping
 			var schema = Table.GetQuotedSchema(dialect, defaultSchema);
 			var quotedName = Table.GetQuotedName(dialect);
 
-			return new StringBuilder()
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder
 				.AppendLine(dialect.GetIfExistsDropConstraint(catalog, schema, quotedName, Name))
 				.AppendFormat("alter table ")
 				.Append(Table.GetQualifiedName(dialect, defaultCatalog, defaultSchema))
 				.Append(" ")
 				.AppendLine(dialect.GetDropForeignKeyConstraintString(Name))
-				.Append(dialect.GetIfExistsDropConstraintEnd(catalog, schema, quotedName, Name))
-				.ToString();
+				.Append(dialect.GetIfExistsDropConstraintEnd(catalog, schema, quotedName, Name));
+
+			return buf.ToStringAndFree();
 		}
 
 		#endregion
@@ -115,18 +117,18 @@ namespace NHibernate.Mapping
 		{
 			if (referencedTable.PrimaryKey.ColumnSpan != ColumnSpan)
 			{
-				StringBuilder sb = new StringBuilder();
-				sb.Append("Foreign key (")
+				var sb = PooledStringBuilder.GetInstance();
+				sb.Builder.Append("Foreign key (")
 					.Append(Name + ":")
 					.Append(Table.Name)
 					.Append(" [");
 				AppendColumns(sb, ColumnIterator);
-				sb.Append("])")
+				sb.Builder.Append("])")
 					.Append(") must have same number of columns as the referenced primary key (")
 					.Append(referencedTable.Name).Append(" [");
 				AppendColumns(sb, referencedTable.PrimaryKey.ColumnIterator);
-				sb.Append("])");
-				throw new FKUnmatchingColumnsException(sb.ToString());
+				sb.Builder.Append("])");
+				throw new FKUnmatchingColumnsException(sb.ToStringAndFree());
 			}
 
 			AlignColumns(ColumnIterator, referencedTable.PrimaryKey.ColumnIterator);
@@ -192,8 +194,8 @@ namespace NHibernate.Mapping
 		{
 			if (!IsReferenceToPrimaryKey)
 			{
-				var result = new StringBuilder();
-				result.Append(GetType().FullName)
+				var result = PooledStringBuilder.GetInstance();;
+				result.Builder.Append(GetType().FullName)
 					.Append('(')
 					.Append(Table.Name)
 					.Append(string.Join(", ", Columns))
@@ -202,7 +204,7 @@ namespace NHibernate.Mapping
 					.Append(string.Join(", ", ReferencedColumns))
 					.Append(") as ")
 					.Append(Name);
-				return result.ToString();
+				return result.ToStringAndFree();
 			}
 
 			return base.ToString();

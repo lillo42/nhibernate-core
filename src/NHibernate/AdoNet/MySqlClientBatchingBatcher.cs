@@ -11,7 +11,7 @@ namespace NHibernate.AdoNet
 		private int batchSize;
 		private int totalExpectedRowsAffected;
 		private MySqlClientSqlCommandSet currentBatch;
-		private StringBuilder currentBatchCommandsLog;
+		private PooledStringBuilder currentBatchCommandsLog;
 
 		public MySqlClientBatchingBatcher(ConnectionManager connectionManager, IInterceptor interceptor)
 			: base(connectionManager, interceptor)
@@ -23,7 +23,8 @@ namespace NHibernate.AdoNet
 			//the user change the logging configuration at runtime. Trying to put this
 			//behind an if(log.IsDebugEnabled) will cause a null reference exception 
 			//at that point.
-			currentBatchCommandsLog = new StringBuilder().AppendLine("Batch commands:");
+			currentBatchCommandsLog = PooledStringBuilder.GetInstance();
+			currentBatchCommandsLog.Builder.AppendLine("Batch commands:");
 		}
 
 		public override int BatchSize
@@ -54,7 +55,7 @@ namespace NHibernate.AdoNet
 				lineWithParameters = sqlStatementLogger.GetCommandLineWithParameters(batchUpdate);
 				var formatStyle = sqlStatementLogger.DetermineActualStyle(FormatStyle.Basic);
 				lineWithParameters = formatStyle.Formatter.Format(lineWithParameters);
-				currentBatchCommandsLog.Append("command ")
+				currentBatchCommandsLog.Builder.Append("command ")
 					.Append(currentBatch.CountOfCommands)
 					.Append(":")
 					.AppendLine(lineWithParameters);
@@ -113,7 +114,9 @@ namespace NHibernate.AdoNet
 
 			if (Factory.Settings.SqlStatementLogger.IsDebugEnabled)
 			{
-				currentBatchCommandsLog = new StringBuilder().AppendLine("Batch commands:");
+				currentBatchCommandsLog.Free();
+				currentBatchCommandsLog = PooledStringBuilder.GetInstance();
+				currentBatchCommandsLog.Builder.AppendLine("Batch commands:");
 			}
 		}
 
@@ -136,6 +139,7 @@ namespace NHibernate.AdoNet
 		protected override void Dispose(bool isDisposing)
 		{
 			base.Dispose(isDisposing);
+			currentBatchCommandsLog.Free();
 			// Prevent exceptions when closing the batch from hiding any original exception
 			// (We do not know here if this batch closing occurs after a failure or not.)
 			try

@@ -296,22 +296,34 @@ namespace NHibernate.Persister.Collection
 
 		public override string SelectFragment(IJoinable rhs, string rhsAlias, string lhsAlias, string entitySuffix, string collectionSuffix, bool includeCollectionColumns, bool fetchLazyProperties)
 		{
-			var buf = new StringBuilder();
+			var buf = PooledStringBuilder.GetInstance();;
 
 			if (includeCollectionColumns)
 			{
-				buf.Append(SelectFragment(lhsAlias, collectionSuffix)).Append(StringHelper.CommaSpace);
+				buf.Builder.Append(SelectFragment(lhsAlias, collectionSuffix)).Append(StringHelper.CommaSpace);
 			}
 
 			if (fetchLazyProperties)
 			{
 				var selectMode = ReflectHelper.CastOrThrow<ISupportSelectModeJoinable>(ElementPersister, "fetch lazy properties");
 				if (selectMode != null)
-					return buf.Append(selectMode.SelectFragment(null, null, lhsAlias, entitySuffix, null, false, fetchLazyProperties)).ToString();
+				{
+					buf.Builder.Append(
+						selectMode.SelectFragment(
+							null,
+							null,
+							lhsAlias,
+							entitySuffix,
+							null,
+							false,
+							fetchLazyProperties));
+					return buf.ToStringAndFree();
+				}
 			}
 
 			var ojl = (IOuterJoinLoadable)ElementPersister;
-			return buf.Append(ojl.SelectFragment(lhsAlias, entitySuffix)).ToString(); //use suffix for the entity columns
+			buf.Builder.Append(ojl.SelectFragment(lhsAlias, entitySuffix)); //use suffix for the entity columns
+			return buf.ToStringAndFree();
 		}
 
 		protected override SelectFragment GenerateSelectFragment(string alias, string columnSuffix)

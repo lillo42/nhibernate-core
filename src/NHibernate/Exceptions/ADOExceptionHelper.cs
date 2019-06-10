@@ -82,28 +82,28 @@ namespace NHibernate.Exceptions
 		public static string ExtendMessage(string message, string sql, object[] parameterValues,
 										   IDictionary<string, TypedValue> namedParameters)
 		{
-			var sb = new StringBuilder();
-			sb.Append(message).AppendLine().Append("[ ").Append(sql ?? SQLNotAvailable).Append(" ]");
+			var sb = PooledStringBuilder.GetInstance();;
+			sb.Builder.Append(message).AppendLine().Append("[ ").Append(sql ?? SQLNotAvailable).Append(" ]");
 			if (parameterValues != null && parameterValues.Length > 0)
 			{
-				sb.AppendLine().Append("Positional parameters: ");
+				sb.Builder.AppendLine().Append("Positional parameters: ");
 				for (int index = 0; index < parameterValues.Length; index++)
 				{
 					object value = parameterValues[index] ?? "null";
-					sb.Append(" #").Append(index).Append(">").Append(value);
+					sb.Builder.Append(" #").Append(index).Append(">").Append(value);
 				}
 			}
 			if (namedParameters != null && namedParameters.Count > 0)
 			{
-				sb.AppendLine();
+				sb.Builder.AppendLine();
 				foreach (var namedParameter in namedParameters)
 				{
 					object value = namedParameter.Value.Value ?? "null";
-					sb.Append("  ").Append("Name:").Append(namedParameter.Key).Append(" - Value:").Append(value);
+					sb.Builder.Append("  ").Append("Name:").Append(namedParameter.Key).Append(" - Value:").Append(value);
 				}
 			}
-			sb.AppendLine();
-			return sb.ToString();
+			sb.Builder.AppendLine();
+			return sb.ToStringAndFree();
 		}
 
 		public static SqlString TryGetActualSqlQuery(Exception sqle, SqlString sql)

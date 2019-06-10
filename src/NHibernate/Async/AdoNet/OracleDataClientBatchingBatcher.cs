@@ -39,7 +39,7 @@ namespace NHibernate.AdoNet
 					lineWithParameters = sqlStatementLogger.GetCommandLineWithParameters(CurrentCommand);
 					var formatStyle = sqlStatementLogger.DetermineActualStyle(FormatStyle.Basic);
 					lineWithParameters = formatStyle.Formatter.Format(lineWithParameters);
-					_currentBatchCommandsLog.Append("command ")
+					_currentBatchCommandsLog.Builder.Append("command ")
 					.Append(_countOfCommands)
 					.Append(":")
 					.AppendLine(lineWithParameters);
@@ -112,8 +112,9 @@ namespace NHibernate.AdoNet
 
 				if (Factory.Settings.SqlStatementLogger.IsDebugEnabled)
 				{
-					Factory.Settings.SqlStatementLogger.LogBatchCommand(_currentBatchCommandsLog.ToString());
-					_currentBatchCommandsLog = new StringBuilder().AppendLine("Batch commands:");
+					Factory.Settings.SqlStatementLogger.LogBatchCommand(_currentBatchCommandsLog.ToStringAndFree());
+					_currentBatchCommandsLog = PooledStringBuilder.GetInstance();
+						_currentBatchCommandsLog.Builder.AppendLine("Batch commands:");
 				}
 
 				foreach (DbParameter currentParameter in _currentBatch.Parameters)

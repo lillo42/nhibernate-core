@@ -44,22 +44,22 @@ namespace NHibernate.Criterion
 			var collectionKeys = collectionPersister.KeyColumnNames;
 			var ownerKeys = ((ILoadable)factory.GetEntityPersister(entityName)).IdentifierColumnNames;
 
-			var innerSelect = new StringBuilder();
-			innerSelect.Append("(select 1 from ")
+			var innerSelect = PooledStringBuilder.GetInstance();
+			innerSelect.Builder.Append("(select 1 from ")
 				.Append(collectionPersister.TableName)
 				.Append(" where ")
 				.Append(
 				new ConditionalFragment().SetTableAlias(sqlAlias).SetCondition(ownerKeys, collectionKeys).ToSqlStringFragment());
 			if (collectionPersister.HasWhere)
 			{
-				innerSelect.Append(" and (")
+				innerSelect.Builder.Append(" and (")
 					.Append(collectionPersister.GetSQLWhereString(collectionPersister.TableName))
 					.Append(") ");
 			}
 
-			innerSelect.Append(")");
+			innerSelect.Builder.Append(")");
 
-			return new SqlString(new object[] {ExcludeEmpty ? "exists" : "not exists", innerSelect.ToString()});
+			return new SqlString(new object[] {ExcludeEmpty ? "exists" : "not exists", innerSelect.ToStringAndFree()});
 		}
 
 

@@ -225,63 +225,63 @@ namespace NHibernate.Cache
 
 		public override string ToString()
 		{
-			StringBuilder buf = new StringBuilder()
-				.Append("sql: ")
+			var buf = PooledStringBuilder.GetInstance();
+				buf.Builder.Append("sql: ")
 				.Append(_sqlQueryString);
 
 			Printer print = new Printer(_factory);
 
 			if (_values != null)
 			{
-				buf
+				buf.Builder
 					.Append("; parameters: ")
 					.Append(print.ToString(_types, _values));
 			}
 			if (_namedParameters != null)
 			{
-				buf
+				buf.Builder
 					.Append("; named parameters: ")
 					.Append(print.ToString(_namedParameters));
 			}
 			if (_filters != null)
 			{
-				buf.Append("; filters: ").Append(CollectionPrinter.ToString(_filters));
+				buf.Builder.Append("; filters: ").Append(CollectionPrinter.ToString(_filters));
 			}
 			if (_firstRow != RowSelection.NoValue)
 			{
-				buf.Append("; first row: ").Append(_firstRow);
+				buf.Builder.Append("; first row: ").Append(_firstRow);
 			}
 			if (_maxRows != RowSelection.NoValue)
 			{
-				buf.Append("; max rows: ").Append(_maxRows);
+				buf.Builder.Append("; max rows: ").Append(_maxRows);
 			}
 
 			if (_multiQueriesFirstRows != null)
 			{
-				buf.Append("; multi queries - first rows: ");
+				buf.Builder.Append("; multi queries - first rows: ");
 				for (int i = 0; i < _multiQueriesFirstRows.Length; i++)
 				{
-					buf.Append("#").Append(i)
+					buf.Builder.Append("#").Append(i)
 						.Append("=")
 						.Append(_multiQueriesFirstRows[i]);
 				}
-				buf.Append("; ");
+				buf.Builder.Append("; ");
 			}
 
 			if (_multiQueriesMaxRows != null)
 			{
-				buf.Append("; multi queries - max rows: ");
+				buf.Builder.Append("; multi queries - max rows: ");
 				for (int i = 0; i < _multiQueriesMaxRows.Length; i++)
 				{
-					buf.Append("#").Append(i)
+					buf.Builder.Append("#").Append(i)
 						.Append("=")
 						.Append(_multiQueriesMaxRows[i]);
 				}
-				buf.Append("; ");
+				buf.Builder.Append("; ");
 			}
 
 
-			return buf.ToString();
+			return buf.ToStringAndFree();
 		}
 	}
 }

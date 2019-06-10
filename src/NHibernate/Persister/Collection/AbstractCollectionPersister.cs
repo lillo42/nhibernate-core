@@ -1379,15 +1379,15 @@ namespace NHibernate.Persister.Collection
 
 		public string GetManyToManyFilterFragment(string alias, IDictionary<string, IFilter> enabledFilters)
 		{
-			StringBuilder buffer = new StringBuilder();
+			var buffer = PooledStringBuilder.GetInstance();;
 			manyToManyFilterHelper.Render(buffer, alias, enabledFilters);
 
 			if (manyToManyWhereString != null)
 			{
-				buffer.Append(" and ").Append(Template.ReplacePlaceholder(manyToManyWhereTemplate, alias));
+				buffer.Builder.Append(" and ").Append(Template.ReplacePlaceholder(manyToManyWhereTemplate, alias));
 			}
 
-			return buffer.ToString();
+			return buffer.ToStringAndFree();
 		}
 		
 		public bool IsManyToManyFiltered(IDictionary<string, IFilter> enabledFilters)
@@ -1482,10 +1482,11 @@ namespace NHibernate.Persister.Collection
 
 		public virtual string FilterFragment(string alias, IDictionary<string, IFilter> enabledFilters)
 		{
-			StringBuilder sessionFilterFragment = new StringBuilder();
+			var sessionFilterFragment = PooledStringBuilder.GetInstance();;
 			filterHelper.Render(sessionFilterFragment, alias, enabledFilters);
 
-			return sessionFilterFragment.Append(FilterFragment(alias)).ToString();
+			sessionFilterFragment.Builder.Append(FilterFragment(alias));
+			return sessionFilterFragment.ToStringAndFree();
 		}
 
 		public string OneToManyFilterFragment(string alias)

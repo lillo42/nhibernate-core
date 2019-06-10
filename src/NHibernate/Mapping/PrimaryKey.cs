@@ -79,13 +79,15 @@ namespace NHibernate.Mapping
 			var schema = Table.GetQuotedSchema(dialect, defaultSchema);
 			var tableName = Table.GetQuotedName(dialect);
 
-			return new StringBuilder()
-							.AppendLine(dialect.GetIfExistsDropConstraint(catalog, schema, tableName, Name))
-							.Append("alter table ")
-							.Append(Table.GetQualifiedName(dialect, defaultCatalog, defaultSchema))
-							.AppendLine(dialect.GetDropPrimaryKeyConstraintString(Name))
-							.Append(dialect.GetIfExistsDropConstraintEnd(catalog, schema, tableName, Name))
-							.ToString();
+			var buf =  PooledStringBuilder.GetInstance();
+			buf.Builder
+				.AppendLine(dialect.GetIfExistsDropConstraint(catalog, schema, tableName, Name))
+				.Append("alter table ")
+				.Append(Table.GetQualifiedName(dialect, defaultCatalog, defaultSchema))
+				.AppendLine(dialect.GetDropPrimaryKeyConstraintString(Name))
+				.Append(dialect.GetIfExistsDropConstraintEnd(catalog, schema, tableName, Name));
+
+			return buf.ToStringAndFree();
 		}
 
 		#endregion

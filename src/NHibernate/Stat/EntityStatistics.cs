@@ -48,15 +48,16 @@ namespace NHibernate.Stat
 
 		public override string ToString()
 		{
-			return new StringBuilder()
-				.Append("EntityStatistics[")
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append("EntityStatistics[")
 				.Append("loadCount=").Append(loadCount)
 				.Append(",updateCount=").Append(updateCount)
 				.Append(",insertCount=").Append(insertCount)
 				.Append(",deleteCount=").Append(deleteCount)
 				.Append(",fetchCount=").Append(fetchCount)
 				.Append(",optimisticLockFailureCount=").Append(optimisticFailureCount)
-				.Append(']').ToString();
+				.Append(']');
+			return buf.ToStringAndFree();
 		}
 	}
 }

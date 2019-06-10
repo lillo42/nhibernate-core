@@ -18,7 +18,7 @@ namespace NHibernate.AdoNet
 		private int _totalExpectedRowsAffected;
 		private DbCommand _currentBatch;
 		private readonly List<DbCommand> _currentBatchCommands = new List<DbCommand>();
-		private StringBuilder _currentBatchCommandsLog;
+		private PooledStringBuilder _currentBatchCommandsLog;
 
 		public HanaBatchingBatcher(ConnectionManager connectionManager, IInterceptor interceptor)
 			: base(connectionManager, interceptor)
@@ -28,7 +28,8 @@ namespace NHibernate.AdoNet
 			//the user change the logging configuration at runtime. Trying to put this
 			//behind an if(log.IsDebugEnabled) will cause a null reference exception 
 			//at that point.
-			_currentBatchCommandsLog = new StringBuilder().AppendLine("Batch commands:");
+			_currentBatchCommandsLog = PooledStringBuilder.GetInstance();
+			_currentBatchCommandsLog.Builder.AppendLine("Batch commands:");
 		}
 
 		public override void AddToBatch(IExpectation expectation)
@@ -49,7 +50,7 @@ namespace NHibernate.AdoNet
 				lineWithParameters = sqlStatementLogger.GetCommandLineWithParameters(batchUpdate);
 				var formatStyle = sqlStatementLogger.DetermineActualStyle(FormatStyle.Basic);
 				lineWithParameters = formatStyle.Formatter.Format(lineWithParameters);
-				_currentBatchCommandsLog.Append("command ")
+				_currentBatchCommandsLog.Builder.Append("command ")
 					.Append(_countOfCommands)
 					.Append(":")
 					.AppendLine(lineWithParameters);
@@ -82,8 +83,9 @@ namespace NHibernate.AdoNet
 
 			if (Factory.Settings.SqlStatementLogger.IsDebugEnabled)
 			{
-				Factory.Settings.SqlStatementLogger.LogBatchCommand(_currentBatchCommandsLog.ToString());
-				_currentBatchCommandsLog = new StringBuilder().AppendLine("Batch commands:");
+				Factory.Settings.SqlStatementLogger.LogBatchCommand(_currentBatchCommandsLog.ToStringAndFree());
+				_currentBatchCommandsLog = PooledStringBuilder.GetInstance();
+				_currentBatchCommandsLog.Builder.AppendLine("Batch commands:");
 			}
 
 			try
@@ -148,8 +150,8 @@ namespace NHibernate.AdoNet
 		protected override void Dispose(bool isDisposing)
 		{
 			base.Dispose(isDisposing);
-
 			CloseBatchCommands();
+			_currentBatchCommandsLog.Free();
 		}
 
 		private void CloseBatchCommands()

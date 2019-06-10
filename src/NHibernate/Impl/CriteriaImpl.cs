@@ -330,31 +330,31 @@ namespace NHibernate.Impl
 		public override string ToString()
 		{
 			bool first = true;
-			StringBuilder builder = new StringBuilder();
+			var builder = PooledStringBuilder.GetInstance();
 			foreach (CriterionEntry criterionEntry in criteria)
 			{
 				if (!first)
 				{
-					builder.Append(" and ");
+					builder.Builder.Append(" and ");
 				}
-				builder.Append(criterionEntry.ToString());
+				builder.Builder.Append(criterionEntry.ToString());
 				first = false;
 			}
 			if (orderEntries.Count != 0)
 			{
-				builder.AppendLine();
+				builder.Builder.AppendLine();
 			}
 			first = true;
 			foreach (OrderEntry orderEntry in orderEntries)
 			{
 				if (!first)
 				{
-					builder.Append(" and ");
+					builder.Builder.Append(" and ");
 				}
-				builder.Append(orderEntry.ToString());
+				builder.Builder.Append(orderEntry.ToString());
 				first = false;
 			}
-			return builder.ToString();
+			return builder.ToStringAndFree();
 		}
 
 		public ICriteria Fetch(SelectMode selectMode, string associationPath, string alias)

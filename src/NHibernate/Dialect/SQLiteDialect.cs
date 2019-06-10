@@ -279,7 +279,7 @@ namespace NHibernate.Dialect
 
 		public override string Qualify(string catalog, string schema, string table)
 		{
-			StringBuilder qualifiedName = new StringBuilder();
+			var qualifiedName = PooledStringBuilder.GetInstance();;
 			bool quoted = false;
 			
 			if (!string.IsNullOrEmpty(catalog))
@@ -294,7 +294,7 @@ namespace NHibernate.Dialect
 					catalog = catalog.Substring(0, catalog.Length - 1);
 					quoted = true;
 				}
-				qualifiedName.Append(catalog).Append(StringHelper.Underscore);
+				qualifiedName.Builder.Append(catalog).Append(StringHelper.Underscore);
 			}
 			if (!string.IsNullOrEmpty(schema))
 			{
@@ -308,7 +308,7 @@ namespace NHibernate.Dialect
 					schema = schema.Substring(0, schema.Length - 1);
 					quoted = true;
 				} 
-				qualifiedName.Append(schema).Append(StringHelper.Underscore);
+				qualifiedName.Builder.Append(schema).Append(StringHelper.Underscore);
 			}
 
 			if (table.StartsWith(OpenQuote))
@@ -322,7 +322,8 @@ namespace NHibernate.Dialect
 				quoted = true;
 			}
 
-			string name = qualifiedName.Append(table).ToString();
+			qualifiedName.Builder.Append(table);
+			string name = qualifiedName.ToStringAndFree();
 			if (quoted)
 				return OpenQuote + name + CloseQuote;
 			return name;

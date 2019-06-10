@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Text;
 using NHibernate.AdoNet.Util;
 using NHibernate.Exceptions;
 using NHibernate.SqlCommand;
@@ -24,7 +22,7 @@ namespace NHibernate.AdoNet
 		private readonly int? _maxNumberOfParameters;
 		private readonly BatchingCommandSet _currentBatch;
 		private int _totalExpectedRowsAffected;
-		private StringBuilder _currentBatchCommandsLog;
+		private PooledStringBuilder _currentBatchCommandsLog;
 
 		public GenericBatchingBatcher(ConnectionManager connectionManager, IInterceptor interceptor)
 			: base(connectionManager, interceptor)
@@ -37,7 +35,8 @@ namespace NHibernate.AdoNet
 			// the user change the logging configuration at runtime. Trying to put this
 			// behind an if(log.IsDebugEnabled) will cause a null reference exception 
 			// at that point.
-			_currentBatchCommandsLog = new StringBuilder().AppendLine("Batch commands:");
+			_currentBatchCommandsLog =PooledStringBuilder.GetInstance();
+			_currentBatchCommandsLog.Builder.AppendLine("Batch commands:");
 		}
 
 		public sealed override int BatchSize { get; set; }
@@ -76,7 +75,7 @@ namespace NHibernate.AdoNet
 				CheckReaders();
 				if (Factory.Settings.SqlStatementLogger.IsDebugEnabled)
 				{
-					Factory.Settings.SqlStatementLogger.LogBatchCommand(_currentBatchCommandsLog.ToString());
+					Factory.Settings.SqlStatementLogger.LogBatchCommand(_currentBatchCommandsLog.Builder.ToString());
 				}
 
 				int rowsAffected;
@@ -106,7 +105,7 @@ namespace NHibernate.AdoNet
 				lineWithParameters = sqlStatementLogger.GetCommandLineWithParameters(batchCommand);
 				var formatStyle = sqlStatementLogger.DetermineActualStyle(FormatStyle.Basic);
 				lineWithParameters = formatStyle.Formatter.Format(lineWithParameters);
-				_currentBatchCommandsLog.Append("command ")
+				_currentBatchCommandsLog.Builder.Append("command ")
 				                        .Append(_currentBatch.CountOfCommands)
 				                        .Append(":")
 				                        .AppendLine(lineWithParameters);
@@ -124,7 +123,9 @@ namespace NHibernate.AdoNet
 
 			if (Factory.Settings.SqlStatementLogger.IsDebugEnabled)
 			{
-				_currentBatchCommandsLog = new StringBuilder().AppendLine("Batch commands:");
+				_currentBatchCommandsLog.Free();
+				_currentBatchCommandsLog = PooledStringBuilder.GetInstance();
+				_currentBatchCommandsLog.Builder.AppendLine("Batch commands:");
 			}
 		}
 
@@ -138,6 +139,7 @@ namespace NHibernate.AdoNet
 		{
 			base.Dispose(isDisposing);
 			_currentBatch.Clear();
+			_currentBatchCommandsLog.Free();
 		}
 
 		private partial class BatchingCommandSet

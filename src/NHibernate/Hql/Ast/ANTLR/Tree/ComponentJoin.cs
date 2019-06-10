@@ -103,18 +103,18 @@ namespace NHibernate.Hql.Ast.ANTLR.Tree
 			public override string RenderScalarIdentifierSelect(int i)
 			{
 				String[] cols = GetBasePropertyMapping().ToColumns(fromElement.TableAlias, fromElement.ComponentProperty);
-				var buf = new StringBuilder();
+				var buf = PooledStringBuilder.GetInstance();
 				// For property references generate <tablealias>.<columnname> as <projectionalias>
 				for (int j = 0; j < cols.Length; j++)
 				{
 					string column = cols[j];
 					if (j > 0)
 					{
-						buf.Append(", ");
+						buf.Builder.Append(", ");
 					}
-					buf.Append(column).Append(" as ").Append(NameGenerator.ScalarName(i, j));
+					buf.Builder.Append(column).Append(" as ").Append(NameGenerator.ScalarName(i, j));
 				}
-				return buf.ToString();
+				return buf.ToStringAndFree();
 			}
 
 			protected IPropertyMapping GetBasePropertyMapping()

@@ -19,7 +19,7 @@ namespace NHibernate.AdoNet
 		private DbCommand _currentBatch;
 		private Dictionary<string, List<object>> _parameterValueListHashTable;
 		private Dictionary<string, bool> _parameterIsAllNullsHashTable;
-		private StringBuilder _currentBatchCommandsLog;
+		private PooledStringBuilder _currentBatchCommandsLog;
 
 		public OracleDataClientBatchingBatcher(ConnectionManager connectionManager, IInterceptor interceptor)
 			: base(connectionManager, interceptor)
@@ -29,7 +29,8 @@ namespace NHibernate.AdoNet
 			//the user change the logging configuration at runtime. Trying to put this
 			//behind an if(log.IsDebugEnabled) will cause a null reference exception 
 			//at that point.
-			_currentBatchCommandsLog = new StringBuilder().AppendLine("Batch commands:");
+			_currentBatchCommandsLog = PooledStringBuilder.GetInstance();
+			_currentBatchCommandsLog.Builder.AppendLine("Batch commands:");
 		}
 
 		public override void AddToBatch(IExpectation expectation)
@@ -43,7 +44,7 @@ namespace NHibernate.AdoNet
 				lineWithParameters = sqlStatementLogger.GetCommandLineWithParameters(CurrentCommand);
 				var formatStyle = sqlStatementLogger.DetermineActualStyle(FormatStyle.Basic);
 				lineWithParameters = formatStyle.Formatter.Format(lineWithParameters);
-				_currentBatchCommandsLog.Append("command ")
+				_currentBatchCommandsLog.Builder.Append("command ")
 					.Append(_countOfCommands)
 					.Append(":")
 					.AppendLine(lineWithParameters);
@@ -109,8 +110,9 @@ namespace NHibernate.AdoNet
 
 				if (Factory.Settings.SqlStatementLogger.IsDebugEnabled)
 				{
-					Factory.Settings.SqlStatementLogger.LogBatchCommand(_currentBatchCommandsLog.ToString());
-					_currentBatchCommandsLog = new StringBuilder().AppendLine("Batch commands:");
+					Factory.Settings.SqlStatementLogger.LogBatchCommand(_currentBatchCommandsLog.ToStringAndFree());
+					_currentBatchCommandsLog =  PooledStringBuilder.GetInstance();
+					_currentBatchCommandsLog.Builder.AppendLine("Batch commands:");
 				}
 
 				foreach (DbParameter currentParameter in _currentBatch.Parameters)
@@ -165,6 +167,12 @@ namespace NHibernate.AdoNet
 		{
 			get { return _batchSize; }
 			set { _batchSize = value; }
+		}
+
+		protected override void Dispose(bool isDisposing)
+		{
+			base.Dispose(isDisposing);
+			_currentBatchCommandsLog.Free();
 		}
 	}
 }

@@ -193,16 +193,17 @@ namespace NHibernate.Type
 			}
 
 			IEntityPersister persister = factory.GetEntityPersister(associatedEntityName);
-			StringBuilder result = new StringBuilder().Append(associatedEntityName);
+			var result = PooledStringBuilder.GetInstance();
+			result.Builder.Append(associatedEntityName);
 
 			if (persister.HasIdentifierProperty)
 			{
 				var id = GetIdentifier(value, persister);
 
-				result.Append('#').Append(persister.IdentifierType.ToLoggableString(id, factory));
+				result.Builder.Append('#').Append(persister.IdentifierType.ToLoggableString(id, factory));
 			}
 
-			return result.ToString();
+			return result.ToStringAndFree();
 		}
 
 		public override string Name

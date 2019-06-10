@@ -47,21 +47,21 @@ namespace NHibernate.Util
 		[Obsolete("Please use string.Join instead")]
 		public static string Join(string separator, IEnumerable objects)
 		{
-			StringBuilder buf = new StringBuilder();
+			var buf = PooledStringBuilder.GetInstance();
 			bool first = true;
 
 			foreach (object obj in objects)
 			{
 				if (!first)
 				{
-					buf.Append(separator);
+					buf.Builder.Append(separator);
 				}
 
 				first = false;
-				buf.Append(obj);
+				buf.Builder.Append(obj);
 			}
 
-			return buf.ToString();
+			return buf.ToStringAndFree();
 		}
 
 		/// <summary>
@@ -763,15 +763,15 @@ namespace NHibernate.Util
 
 		public static string CollectionToString(IEnumerable keys)
 		{
-			var sb = new StringBuilder();
+			var sb = PooledStringBuilder.GetInstance();
 			foreach (object o in keys)
 			{
-				sb.Append(o);
-				sb.Append(", ");
+				sb.Builder.Append(o);
+				sb.Builder.Append(", ");
 			}
 			if (sb.Length != 0)//remove last ", "
-				sb.Remove(sb.Length - 2, 2);
-			return sb.ToString();
+				sb.Builder.Remove(sb.Length - 2, 2);
+			return sb.ToStringAndFree();
 		}
 
 		public static string ToUpperCase(string str)

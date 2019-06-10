@@ -47,17 +47,17 @@ namespace NHibernate.Hql.Ast.ANTLR
 		private string GetErrorString() 
 		{
 			bool first = true;
-			StringBuilder buf = new StringBuilder();
+			var buf = PooledStringBuilder.GetInstance();
 			foreach (string error in _errorList) 
 			{
-				buf.Append(error);
+				buf.Builder.Append(error);
 
-				if (!first) buf.Append('\n');
+				if (!first) buf.Builder.Append('\n');
 
 				first = false;
 
 			}
-			return buf.ToString();
+			return buf.ToStringAndFree();
 		}
 
 		public void ThrowQueryException()

@@ -2149,13 +2149,15 @@ namespace NHibernate.Persister.Entity
 			if (tableNumber == 0)
 				return rootAlias;
 
-			StringBuilder buf = new StringBuilder().Append(rootAlias);
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append(rootAlias);
 			if (!rootAlias.EndsWith("_"))
 			{
-				buf.Append('_');
+				buf.Builder.Append('_');
 			}
 
-			return buf.Append(tableNumber).Append('_').ToString();
+			buf.Builder.Append(tableNumber).Append('_');
+			return buf.ToStringAndFree();
 		}
 
 		public string[] ToColumns(string name, int i)
@@ -3656,11 +3658,12 @@ namespace NHibernate.Persister.Entity
 
 		public virtual string FilterFragment(string alias, IDictionary<string, IFilter> enabledFilters)
 		{
-			StringBuilder sessionFilterFragment = new StringBuilder();
+			var sessionFilterFragment = PooledStringBuilder.GetInstance();;
 
 			filterHelper.Render(sessionFilterFragment, GenerateFilterConditionAlias(alias), GetColumnsToTableAliasMap(alias), enabledFilters);
 
-			return sessionFilterFragment.Append(FilterFragment(alias)).ToString();
+			sessionFilterFragment.Builder.Append(FilterFragment(alias));
+			return sessionFilterFragment.ToStringAndFree();
 		}
 
 		private IDictionary<string, string> GetColumnsToTableAliasMap(string rootAlias)

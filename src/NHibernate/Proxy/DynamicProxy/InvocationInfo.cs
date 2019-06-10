@@ -67,18 +67,18 @@ namespace NHibernate.Proxy.DynamicProxy
 
 		public override string ToString()
 		{
-			var builder = new StringBuilder();
-			builder.AppendFormat("Target Method:{0,30:G}\n", GetMethodName(_targetMethod));
-			builder.AppendLine("Arguments:");
+			var builder = PooledStringBuilder.GetInstance();
+			builder.Builder.AppendFormat("Target Method:{0,30:G}\n", GetMethodName(_targetMethod));
+			builder.Builder.AppendLine("Arguments:");
 
 			foreach (var info in _targetMethod.GetParameters())
 			{
 				object currentArgument = args[info.Position] ?? "(null)";
-				builder.AppendFormat("\t{0,10:G}: {1}\n", info.Name, currentArgument);
+				builder.Builder.AppendFormat("\t{0,10:G}: {1}\n", info.Name, currentArgument);
 			}
-			builder.AppendLine();
+			builder.Builder.AppendLine();
 
-			return builder.ToString();
+			return builder.ToStringAndFree();
 		}
 
 		private string GetMethodName(MethodInfo method)

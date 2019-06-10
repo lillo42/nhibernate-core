@@ -32,65 +32,65 @@ namespace NHibernate.Util
 
 		public static string ToString(IDictionary dictionary)
 		{
-			StringBuilder result = new StringBuilder();
-			result.Append("{");
+			var result = PooledStringBuilder.GetInstance();
+			result.Builder.Append("{");
 
 			bool first = true;
 			foreach (DictionaryEntry de in dictionary)
 			{
 				if (!first)
 				{
-					result.Append(", ");
+					result.Builder.Append(", ");
 				}
 				AppendNullOrValue(result, de.Key);
-				result.Append("=");
+				result.Builder.Append("=");
 				AppendNullOrValue(result, de.Value);
 				first = false;
 			}
 
-			result.Append("}");
-			return result.ToString();
+			result.Builder.Append("}");
+			return result.ToStringAndFree();
 		}
 
 		public static string ToString(IDictionary<string, string> dictionary)
 		{
-			StringBuilder result = new StringBuilder();
-			result.Append("{");
+			var result = PooledStringBuilder.GetInstance();
+			result.Builder.Append("{");
 
 			bool first = true;
 			foreach (KeyValuePair<string, string> de in dictionary)
 			{
 				if (!first)
-					result.Append(", ");
+					result.Builder.Append(", ");
 
 				AppendNullOrValue(result, de.Key);
-				result.Append("=");
+				result.Builder.Append("=");
 				AppendNullOrValue(result, de.Value);
 				first = false;
 			}
 
-			result.Append("}");
-			return result.ToString();
+			result.Builder.Append("}");
+			return result.ToStringAndFree();
 		}
 
 		public static string ToString(IEnumerable elements)
 		{
-			StringBuilder result = new StringBuilder();
-			result.Append("[");
+			var result = PooledStringBuilder.GetInstance();
+			result.Builder.Append("[");
 
 			bool first = true;
 			foreach (object item in elements)
 			{
 				if (!first)
 				{
-					result.Append(", ");
+					result.Builder.Append(", ");
 				}
 				AppendNullOrValue(result, item);
 				first = false;
 			}
 
-			result.Append("]");
-			return result.ToString();
+			result.Builder.Append("]");
+			return result.ToStringAndFree();
 		}
 
 	}

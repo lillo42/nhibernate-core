@@ -507,21 +507,21 @@ namespace NHibernate.Util
 		/// <summary></summary>
 		public override string ToString()
 		{
-			StringBuilder buf = new StringBuilder();
-			buf.Append('[');
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append('[');
 			for (Entry pos = _sentinel.Next; pos != _sentinel; pos = pos.Next)
 			{
-				buf.Append(pos.Key);
-				buf.Append('=');
-				buf.Append(pos.Value);
+				buf.Builder.Append(pos.Key);
+				buf.Builder.Append('=');
+				buf.Builder.Append(pos.Value);
 				if (pos.Next != _sentinel)
 				{
-					buf.Append(',');
+					buf.Builder.Append(',');
 				}
 			}
-			buf.Append(']');
+			buf.Builder.Append(']');
 
-			return buf.ToString();
+			return buf.ToStringAndFree();
 		}
 
 		#endregion

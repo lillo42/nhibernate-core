@@ -658,15 +658,15 @@ namespace NHibernate.Cfg
 
 		private static string BuildTableNameKey(string schema, string catalog, string name)
 		{
-			var keyBuilder = new StringBuilder();
+			var keyBuilder = PooledStringBuilder.GetInstance();
 			if (schema != null)
-				keyBuilder.Append(schema);
-			keyBuilder.Append(".");
+				keyBuilder.Builder.Append(schema);
+			keyBuilder.Builder.Append(".");
 			if (catalog != null)
-				keyBuilder.Append(catalog);
-			keyBuilder.Append(".");
-			keyBuilder.Append(name);
-			return keyBuilder.ToString();
+				keyBuilder.Builder.Append(catalog);
+			keyBuilder.Builder.Append(".");
+			keyBuilder.Builder.Append(name);
+			return keyBuilder.ToStringAndFree();
 		}
 
 		#endregion

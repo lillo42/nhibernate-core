@@ -22,29 +22,29 @@ namespace NHibernate.Impl
 		/// <returns>A descriptive <see cref="String" /> in the format of <c>[classname#id]</c></returns>
 		public static string InfoString(System.Type clazz, object id)
 		{
-			StringBuilder s = new StringBuilder();
-			s.Append('[');
+			var s = PooledStringBuilder.GetInstance();
+			s.Builder.Append('[');
 			if (clazz == null)
 			{
-				s.Append("<null Class>");
+				s.Builder.Append("<null Class>");
 			}
 			else
 			{
-				s.Append(clazz.Name);
+				s.Builder.Append(clazz.Name);
 			}
-			s.Append('#');
+			s.Builder.Append('#');
 
 			if (id == null)
 			{
-				s.Append("<null>");
+				s.Builder.Append("<null>");
 			}
 			else
 			{
-				s.Append(id);
+				s.Builder.Append(id);
 			}
-			s.Append(']');
+			s.Builder.Append(']');
 
-			return s.ToString();
+			return s.ToStringAndFree();
 		}
 
 		/// <summary>
@@ -56,29 +56,29 @@ namespace NHibernate.Impl
 		/// <returns>A descriptive <see cref="String" /> in the format of <c>[classname#id]</c></returns>
 		public static string InfoString(IEntityPersister persister, object id, ISessionFactoryImplementor factory)
 		{
-			StringBuilder s = new StringBuilder();
-			s.Append('[');
+			var s = PooledStringBuilder.GetInstance();
+			s.Builder.Append('[');
 			if (persister == null)
 			{
-				s.Append("<null Class>");
+				s.Builder.Append("<null Class>");
 			}
 			else
 			{
-				s.Append(persister.EntityName);
+				s.Builder.Append(persister.EntityName);
 			}
-			s.Append('#');
+			s.Builder.Append('#');
 
 			if (id == null)
 			{
-				s.Append("<null>");
+				s.Builder.Append("<null>");
 			}
 			else
 			{
-				s.Append(id);
+				s.Builder.Append(id);
 			}
-			s.Append(']');
+			s.Builder.Append(']');
 
-			return s.ToString();
+			return s.ToStringAndFree();
 		}
 
 		/// <summary>
@@ -92,29 +92,29 @@ namespace NHibernate.Impl
 		public static string InfoString(IEntityPersister persister, object id, IType identifierType,
 										ISessionFactoryImplementor factory)
 		{
-			StringBuilder s = new StringBuilder();
-			s.Append('[');
+			var s = PooledStringBuilder.GetInstance();
+			s.Builder.Append('[');
 			if (persister == null)
 			{
-				s.Append("<null Class>");
+				s.Builder.Append("<null Class>");
 			}
 			else
 			{
-				s.Append(persister.EntityName);
+				s.Builder.Append(persister.EntityName);
 			}
-			s.Append('#');
+			s.Builder.Append('#');
 
 			if (id == null)
 			{
-				s.Append("<null>");
+				s.Builder.Append("<null>");
 			}
 			else
 			{
-				s.Append(identifierType.ToLoggableString(id, factory));
+				s.Builder.Append(identifierType.ToLoggableString(id, factory));
 			}
-			s.Append(']');
+			s.Builder.Append(']');
 
-			return s.ToString();
+			return s.ToStringAndFree();
 		}
 
 		public static string InfoString(
@@ -122,31 +122,31 @@ namespace NHibernate.Impl
 			object[] ids,
 			ISessionFactoryImplementor factory)
 		{
-			StringBuilder s = new StringBuilder();
-			s.Append('[');
+			var s = PooledStringBuilder.GetInstance();
+			s.Builder.Append('[');
 
 			if (persister == null)
 			{
-				s.Append("<null IEntityPersister>");
+				s.Builder.Append("<null IEntityPersister>");
 			}
 			else
 			{
-				s.Append(persister.EntityName)
+				s.Builder.Append(persister.EntityName)
 					.Append("#<");
 
 				for (int i = 0; i < ids.Length; i++)
 				{
-					s.Append(persister.IdentifierType.ToLoggableString(ids[i], factory));
+					s.Builder.Append(persister.IdentifierType.ToLoggableString(ids[i], factory));
 					if (i < ids.Length - 1)
 					{
-						s.Append(StringHelper.CommaSpace);
+						s.Builder.Append(StringHelper.CommaSpace);
 					}
-					s.Append('>');
+					s.Builder.Append('>');
 				}
 			}
 
-			s.Append(']');
-			return s.ToString();
+			s.Builder.Append(']');
+			return s.ToStringAndFree();
 		}
 
 		/// <summary>
@@ -157,29 +157,29 @@ namespace NHibernate.Impl
 		/// <returns>A descriptive <see cref="String" /> in the form <c>[FooBar#id]</c></returns>
 		public static string InfoString(IEntityPersister persister, object id)
 		{
-			StringBuilder s = new StringBuilder();
-			s.Append('[');
+			var s = PooledStringBuilder.GetInstance();
+			s.Builder.Append('[');
 			if (persister == null)
 			{
-				s.Append("<null ClassPersister>");
+				s.Builder.Append("<null ClassPersister>");
 			}
 			else
 			{
-				s.Append(persister.EntityName);
+				s.Builder.Append(persister.EntityName);
 			}
-			s.Append('#');
+			s.Builder.Append('#');
 
 			if (id == null)
 			{
-				s.Append("<null>");
+				s.Builder.Append("<null>");
 			}
 			else
 			{
-				s.Append(id);
+				s.Builder.Append(id);
 			}
 
-			s.Append(']');
-			return s.ToString();
+			s.Builder.Append(']');
+			return s.ToStringAndFree();
 		}
 
 		/// <summary>
@@ -189,18 +189,18 @@ namespace NHibernate.Impl
 		/// <returns>A descriptive <see cref="String" /> in the form <c>[FooBar]</c></returns>
 		public static String InfoString(IEntityPersister persister)
 		{
-			StringBuilder s = new StringBuilder();
-			s.Append('[');
+			var s = PooledStringBuilder.GetInstance();
+			s.Builder.Append('[');
 			if (persister == null)
 			{
-				s.Append("<null ClassPersister>");
+				s.Builder.Append("<null ClassPersister>");
 			}
 			else
 			{
-				s.Append(persister.EntityName);
+				s.Builder.Append(persister.EntityName);
 			}
-			s.Append(']');
-			return s.ToString();
+			s.Builder.Append(']');
+			return s.ToStringAndFree();
 		}
 
 		/// <summary>
@@ -222,29 +222,29 @@ namespace NHibernate.Impl
 		/// <returns>A descriptive <see cref="String" /> in the form <c>[collectionrole#id]</c></returns>
 		internal static string CollectionInfoString(ICollectionPersister persister, object id)
 		{
-			StringBuilder s = new StringBuilder();
-			s.Append('[');
+			var s = PooledStringBuilder.GetInstance();
+			s.Builder.Append('[');
 			if (persister == null)
 			{
-				s.Append("<unreferenced>");
+				s.Builder.Append("<unreferenced>");
 			}
 			else
 			{
-				s.Append(persister.Role);
-				s.Append('#');
+				s.Builder.Append(persister.Role);
+				s.Builder.Append('#');
 
 				if (id == null)
 				{
-					s.Append("<null>");
+					s.Builder.Append("<null>");
 				}
 				else
 				{
-					s.Append(id);
+					s.Builder.Append(id);
 				}
 			}
-			s.Append(']');
+			s.Builder.Append(']');
 
-			return s.ToString();
+			return s.ToStringAndFree();
 		}
 
 		/// <summary> 
@@ -257,7 +257,8 @@ namespace NHibernate.Impl
 		/// <returns> An info string, in the form [Foo.bars#1] </returns>
 		public static string InfoString(string entityName, string propertyName, object key)
 		{
-			StringBuilder s = new StringBuilder()
+			var s = PooledStringBuilder.GetInstance();
+			s.Builder
 				.Append('[')
 				.Append(entityName)
 				.Append('.')
@@ -266,7 +267,7 @@ namespace NHibernate.Impl
 				.Append((key ?? "<null>"))
 				.Append(']');
 
-			return s.ToString();
+			return s.ToStringAndFree();
 		}
 
 		/// <summary>
@@ -282,16 +283,16 @@ namespace NHibernate.Impl
 		internal static String CollectionInfoString(ICollectionPersister persister, IPersistentCollection collection, object collectionKey, ISessionImplementor session)
 		{
 
-			StringBuilder s = new StringBuilder();
-			s.Append("[");
+			var s = PooledStringBuilder.GetInstance();
+			s.Builder.Append("[");
 			if (persister == null)
 			{
-				s.Append("<unreferenced>");
+				s.Builder.Append("<unreferenced>");
 			}
 			else
 			{
-				s.Append(persister.Role);
-				s.Append("#");
+				s.Builder.Append(persister.Role);
+				s.Builder.Append("#");
 
 				IType ownerIdentifierType = persister.OwnerEntityPersister.IdentifierType;
 				object ownerKey;
@@ -305,11 +306,11 @@ namespace NHibernate.Impl
 				{
 					ownerKey = session.PersistenceContext.GetEntry(collection.Owner).Id;
 				}
-				s.Append(ownerIdentifierType.ToLoggableString(ownerKey, session.Factory));
+				s.Builder.Append(ownerIdentifierType.ToLoggableString(ownerKey, session.Factory));
 			}
-			s.Append("]");
+			s.Builder.Append("]");
 
-			return s.ToString();
+			return s.ToStringAndFree();
 		}
 
 		/// <summary> 
@@ -334,29 +335,29 @@ namespace NHibernate.Impl
 		/// <returns> An info string, in the form [Foo.bars#1] </returns>
 		internal static string CollectionInfoString(ICollectionPersister persister, object id, ISessionFactoryImplementor factory)
 		{
-			StringBuilder s = new StringBuilder();
-			s.Append("[");
+			var s = PooledStringBuilder.GetInstance();
+			s.Builder.Append("[");
 			if (persister == null)
 			{
-				s.Append("<unreferenced>");
+				s.Builder.Append("<unreferenced>");
 			}
 			else
 			{
-				s.Append(persister.Role);
-				s.Append("#");
+				s.Builder.Append(persister.Role);
+				s.Builder.Append("#");
 
 				if (id == null)
 				{
-					s.Append("<null>");
+					s.Builder.Append("<null>");
 				}
 				else
 				{
 					AddIdToCollectionInfoString(persister, id, factory, s);
 				}
 			}
-			s.Append("]");
+			s.Builder.Append("]");
 
-			return s.ToString();
+			return s.ToStringAndFree();
 		}
 
 		private static void AddIdToCollectionInfoString(ICollectionPersister persister, object id, ISessionFactoryImplementor factory, StringBuilder s)
@@ -390,14 +391,15 @@ namespace NHibernate.Impl
 		/// <returns> An info string, in the form [FooBar#1]. </returns>
 		public static string InfoString(string entityName, object id)
 		{
-			StringBuilder s = new StringBuilder()
+			var s = PooledStringBuilder.GetInstance();
+			s.Builder
 				.Append('[')
 				.Append((entityName ?? "<null entity name>"))
 				.Append('#')
 				.Append((id ?? "<null>"))
 				.Append(']');
 
-			return s.ToString();
+			return s.ToStringAndFree();
 		}
 	}
 }

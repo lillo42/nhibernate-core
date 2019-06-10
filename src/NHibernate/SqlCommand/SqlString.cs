@@ -205,7 +205,7 @@ namespace NHibernate.SqlCommand
 			_parameters = new SortedList<int, Parameter>();
 
 			var sqlIndex = 0;
-			var pendingContent = new StringBuilder();  // Collect adjoining string parts (the compaction).
+			var pendingContent = PooledStringBuilder.GetInstance();  // Collect adjoining string parts (the compaction).
 			foreach (var part in parts)
 			{
 				Add(part, pendingContent, ref sqlIndex);
@@ -215,6 +215,7 @@ namespace NHibernate.SqlCommand
 			_firstPartIndex = _parts.Count > 0 ? 0 : -1;
 			_lastPartIndex = _parts.Count - 1;
 			_length = sqlIndex;
+			pendingContent.Free();
 		}
 
 		#endregion

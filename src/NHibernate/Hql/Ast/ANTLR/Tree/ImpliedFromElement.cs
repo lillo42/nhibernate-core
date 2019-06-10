@@ -56,11 +56,11 @@ namespace NHibernate.Hql.Ast.ANTLR.Tree
 
         public override string GetDisplayText()
         {
-            StringBuilder buf = new StringBuilder();
-            buf.Append("ImpliedFromElement{");
+            var buf = PooledStringBuilder.GetInstance();
+            buf.Builder.Append("ImpliedFromElement{");
             AppendDisplayText(buf);
-            buf.Append("}");
-            return buf.ToString();
+            buf.Builder.Append("}");
+            return buf.ToStringAndFree();
         }
 	}
 }

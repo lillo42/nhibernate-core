@@ -51,7 +51,7 @@ namespace NHibernate.Criterion
 			string[] columns = criteriaQuery.GetColumnAliasesUsingProjection(criteria, propertyName);
 			Type.IType type = criteriaQuery.GetTypeUsingProjection(criteria, propertyName);
 
-			StringBuilder fragment = new StringBuilder();
+			var fragment = PooledStringBuilder.GetInstance();
 			ISessionFactoryImplementor factory = criteriaQuery.Factory;
 			for (int i = 0; i < columns.Length; i++)
 			{
@@ -59,25 +59,25 @@ namespace NHibernate.Criterion
 
 				if (lower)
 				{
-					fragment.Append(factory.Dialect.LowercaseFunction)
+					fragment.Builder.Append(factory.Dialect.LowercaseFunction)
 						.Append("(");
 				}
-				fragment.Append(columns[i]);
+				fragment.Builder.Append(columns[i]);
 
 				if (lower)
 				{
-					fragment.Append(")");
+					fragment.Builder.Append(")");
 				}
 
-				fragment.Append(ascending ? " asc" : " desc");
+				fragment.Builder.Append(ascending ? " asc" : " desc");
 
 				if (i < columns.Length - 1)
 				{
-					fragment.Append(", ");
+					fragment.Builder.Append(", ");
 				}
 			}
 
-			return new SqlString(fragment.ToString());
+			return new SqlString(fragment.ToStringAndFree());
 		}
 
 		public override string ToString()

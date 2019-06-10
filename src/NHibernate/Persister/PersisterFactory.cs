@@ -129,11 +129,11 @@ namespace NHibernate.Persister
 			}
 			if(pc == null)
 			{
-				var messageBuilder = new StringBuilder();
-				messageBuilder.Append("Could not find a public constructor for ").Append(persisterClass.Name).AppendLine(";");
-				messageBuilder.Append("- The ctor may have ").Append(CollectionPersisterConstructorArgs.Length).AppendLine(" parameters of types (in order):");
-				System.Array.ForEach(CollectionPersisterConstructorArgs, t=> messageBuilder.AppendLine(t.FullName));
-				throw new MappingException(messageBuilder.ToString());
+				var messageBuilder = PooledStringBuilder.GetInstance();
+				messageBuilder.Builder.Append("Could not find a public constructor for ").Append(persisterClass.Name).AppendLine(";");
+				messageBuilder.Builder.Append("- The ctor may have ").Append(CollectionPersisterConstructorArgs.Length).AppendLine(" parameters of types (in order):");
+				System.Array.ForEach(CollectionPersisterConstructorArgs, t=> messageBuilder.Builder.AppendLine(t.FullName));
+				throw new MappingException(messageBuilder.ToStringAndFree());
 			}
 			try
 			{

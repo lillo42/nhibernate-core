@@ -32,26 +32,26 @@ namespace NHibernate.Hql.Ast.ANTLR.Tree
 		/// <returns>The additional display text.</returns>
 		public String GetDisplayText()
 		{
-			StringBuilder buf = new StringBuilder();
+			var buf = PooledStringBuilder.GetInstance();
 			if (Walker.QuerySpaces.Count > 0)
 			{
-				buf.Append(" querySpaces (");
+				buf.Builder.Append(" querySpaces (");
 				bool first = true;
 
 				foreach (string space in Walker.QuerySpaces)
 				{
 					if (!first)
 					{
-						buf.Append(',');
+						buf.Builder.Append(',');
 					}
 
-					buf.Append(space);
+					buf.Builder.Append(space);
 					first = false;
 				}
 
-				buf.Append(")");
+				buf.Builder.Append(")");
 			}
-			return buf.ToString();
+			return buf.ToStringAndFree();
 		}
 	}
 }

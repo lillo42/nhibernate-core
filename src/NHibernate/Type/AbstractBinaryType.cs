@@ -143,15 +143,15 @@ namespace NHibernate.Type
 		{
 			// convert to HEX string
 			byte[] bytes = ToInternalFormat(val);
-			StringBuilder buf = new StringBuilder();
+			var buf = PooledStringBuilder.GetInstance();
 			for (int i = 0; i < bytes.Length; i++)
 			{
 				String hexStr = Convert.ToString(bytes[i] - Byte.MinValue, 16);
 				if (hexStr.Length == 1)
-					buf.Append('0');
-				buf.Append(hexStr);
+					buf.Builder.Append('0');
+				buf.Builder.Append(hexStr);
 			}
-			return buf.ToString();
+			return buf.ToStringAndFree();
 		}
 
 		public override object DeepCopyNotNull(object value)

@@ -618,11 +618,11 @@ namespace NHibernate.Hql.Ast.ANTLR.Tree
 
 		public virtual string GetDisplayText()
 		{
-			StringBuilder buf = new StringBuilder();
-			buf.Append("FromElement{");
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append("FromElement{");
 			AppendDisplayText(buf);
-			buf.Append("}");
-			return buf.ToString();
+			buf.Builder.Append("}");
+			return buf.ToStringAndFree();
 		}
 
 		public void InitializeCollection(FromClause fromClause, string classAlias, string tableAlias)
