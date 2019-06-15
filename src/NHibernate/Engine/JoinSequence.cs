@@ -23,21 +23,19 @@ namespace NHibernate.Engine
 
 		public override string ToString()
 		{
-			var buf = PooledStringBuilder.GetInstance();
-			buf.Builder.Append("JoinSequence{");
+			var buf = new StringBuilder().Append("JoinSequence{");
 			if (rootJoinable != null)
 			{
-				buf.Builder.Append(rootJoinable)
+				buf.Append(rootJoinable)
 					.Append('[')
 					.Append(rootAlias)
 					.Append(']');
 			}
 			for (int i = 0; i < joins.Count; i++)
 			{
-				buf.Builder.Append("->").Append(joins[i]);
+				buf.Append("->").Append(joins[i]);
 			}
-			buf.Builder.Append('}');
-			return buf.ToStringAndFree();
+			return buf.Append('}').ToString();
 		}
 
 		private sealed class Join

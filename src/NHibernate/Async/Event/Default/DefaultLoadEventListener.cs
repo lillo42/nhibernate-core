@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Microsoft.Extensions.ObjectPool;
 using NHibernate.Action;
 using NHibernate.Cache;
 using NHibernate.Cache.Access;
@@ -28,7 +29,6 @@ namespace NHibernate.Event.Default
 	using System.Threading;
 	public partial class DefaultLoadEventListener : AbstractLockUpgradeEventListener, ILoadEventListener
 	{
-
 		public virtual async Task OnLoadAsync(LoadEvent @event, LoadType loadType, CancellationToken cancellationToken)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
@@ -48,12 +48,12 @@ namespace NHibernate.Event.Default
 			if (persister == null)
 			{
 
-				var message = new StringBuilder(512);
-				message.AppendLine(string.Format("Unable to locate persister for the entity named '{0}'.", @event.EntityClassName));
-				message.AppendLine("The persister define the persistence strategy for an entity.");
-				message.AppendLine("Possible causes:");
-				message.AppendLine(string.Format(" - The mapping for '{0}' was not added to the NHibernate configuration.", @event.EntityClassName));
-				throw new HibernateException(message.ToString());
+				var message = _pool.Allocate();
+				message.Builder.AppendLine(string.Format("Unable to locate persister for the entity named '{0}'.", @event.EntityClassName));
+				message.Builder.AppendLine("The persister define the persistence strategy for an entity.");
+				message.Builder.AppendLine("Possible causes:");
+				message.Builder.AppendLine(string.Format(" - The mapping for '{0}' was not added to the NHibernate configuration.", @event.EntityClassName));
+				throw new HibernateException(message.ToStringAndFree());
 			}
 
 			if (persister.IdentifierType.IsComponentType)

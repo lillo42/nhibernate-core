@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
+using Microsoft.Extensions.ObjectPool;
 using NHibernate.Action;
 using NHibernate.Cache;
 using NHibernate.Cache.Access;
@@ -21,6 +23,7 @@ namespace NHibernate.Event.Default
 	[Serializable]
 	public partial class DefaultLoadEventListener : AbstractLockUpgradeEventListener, ILoadEventListener
 	{
+		private static ObjectPool<PooledStringBuilder> _pool = PooledStringBuilder.CreatePool(512, 32);
 		private static readonly INHibernateLogger log = NHibernateLogger.For(typeof(DefaultLoadEventListener));
 		public static readonly object RemovedEntityMarker = new object();
 		public static readonly object InconsistentRTNClassMarker= new object();
@@ -43,13 +46,12 @@ namespace NHibernate.Event.Default
 
 			if (persister == null)
 			{
-
-				var message = new StringBuilder(512);
-				message.AppendLine(string.Format("Unable to locate persister for the entity named '{0}'.", @event.EntityClassName));
-				message.AppendLine("The persister define the persistence strategy for an entity.");
-				message.AppendLine("Possible causes:");
-				message.AppendLine(string.Format(" - The mapping for '{0}' was not added to the NHibernate configuration.", @event.EntityClassName));
-				throw new HibernateException(message.ToString());
+				var message = _pool.Allocate();
+				message.Builder.AppendLine(string.Format("Unable to locate persister for the entity named '{0}'.", @event.EntityClassName));
+				message.Builder.AppendLine("The persister define the persistence strategy for an entity.");
+				message.Builder.AppendLine("Possible causes:");
+				message.Builder.AppendLine(string.Format(" - The mapping for '{0}' was not added to the NHibernate configuration.", @event.EntityClassName));
+				throw new HibernateException(message.ToStringAndFree());
 			}
 
 			if (persister.IdentifierType.IsComponentType)
@@ -592,12 +594,11 @@ namespace NHibernate.Event.Default
 			string[] implementors = factory.GetImplementors(entityName);
 			if (implementors.Length > 1)
 			{
-				var messageBuilder = new StringBuilder(512);
-				messageBuilder.AppendLine(string.Format("Ambiguous persister for {0} implemented by more than one hierarchy: ",
-				                                        entityName));
-				Array.ForEach(implementors, s=> messageBuilder.AppendLine(s));
+				var messageBuilder = _pool.Allocate();
+				messageBuilder.Builder.Append("Ambiguous persister for ").Append(entityName).AppendLine(" implemented by more than one hierarchy: ");
+				Array.ForEach(implementors, s=> messageBuilder.Builder.AppendLine(s));
 
-				throw new HibernateException(messageBuilder.ToString());
+				throw new HibernateException(messageBuilder.ToStringAndFree());
 			}
 			if (implementors.Length == 0)
 			{

@@ -807,9 +807,7 @@ namespace NHibernate.Stat
 
 		public override string ToString()
 		{
-			var buf = PooledStringBuilder.GetInstance();
-			
-			buf.Builder.Append("Statistics[").Append("start time=").Append(startTime).Append(",sessions opened=").Append
+			return new StringBuilder().Append("Statistics[").Append("start time=").Append(startTime).Append(",sessions opened=").Append
 					(sessionOpenCount).Append(",sessions closed=").Append(sessionCloseCount).Append(",transactions=").Append(
 					transactionCount).Append(",successful transactions=").Append(commitedTransactionCount).Append(
 					",optimistic lock failures=").Append(optimisticFailureCount).Append(",flushes=").Append(flushCount).Append(
@@ -824,9 +822,7 @@ namespace NHibernate.Stat
 					collectionRecreateCount).Append(",collections fetched=").Append(collectionFetchCount).Append(
 					",queries executed to database=").Append(queryExecutionCount).Append(",query cache puts=").Append(
 					queryCachePutCount).Append(",query cache hits=").Append(queryCacheHitCount).Append(",query cache misses=").Append(
-					queryCacheMissCount).Append(",max query time=").Append(queryExecutionMaxTime).Append(']');
-
-			return buf.ToStringAndFree();
+					queryCacheMissCount).Append(",max query time=").Append(queryExecutionMaxTime).Append(']').ToString();
 		}
 	}
 }

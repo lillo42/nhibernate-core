@@ -82,7 +82,7 @@ namespace NHibernate.Exceptions
 		public static string ExtendMessage(string message, string sql, object[] parameterValues,
 										   IDictionary<string, TypedValue> namedParameters)
 		{
-			var sb = PooledStringBuilder.GetInstance();;
+			var sb = PooledStringBuilder.GetInstance();
 			sb.Builder.Append(message).AppendLine().Append("[ ").Append(sql ?? SQLNotAvailable).Append(" ]");
 			if (parameterValues != null && parameterValues.Length > 0)
 			{

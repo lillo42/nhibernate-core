@@ -1420,15 +1420,13 @@ namespace NHibernate.Engine
 
 		public override string ToString()
 		{
-			var buf = PooledStringBuilder.GetInstance();
-			buf.Builder
+			return new StringBuilder()
 				.Append("PersistenceContext[entityKeys=")
 				.Append(CollectionPrinter.ToString(entitiesByKey.Keys))
 				.Append(",collectionKeys=")
 				.Append(CollectionPrinter.ToString(collectionsByKey.Keys))
-				.Append("]");
-			
-			return buf.ToStringAndFree();
+				.Append("]")
+				.ToString();
 		}
 
 		#region IDeserializationCallback Members

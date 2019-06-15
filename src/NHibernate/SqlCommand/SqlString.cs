@@ -959,11 +959,14 @@ namespace NHibernate.SqlCommand
 			return ToString(startIndex, _length - startIndex);
 		}
 
-		public string ToString(int startIndex, int length)
+		internal StringBuilder ToStringBuilder()
+			=> ToStringBuilder(0, _length);
+		
+		internal StringBuilder ToStringBuilder(int startIndex, int length)
 		{
 			var sqlStartIndex = _sqlStartIndex + startIndex;
 			var nextPartIndex = GetPartIndexForSqlIndex(sqlStartIndex);
-			if (nextPartIndex < 0) return string.Empty;
+			if (nextPartIndex < 0) return new StringBuilder();
 
 			var maxSearchLength = Math.Min(_sqlStartIndex + _length - sqlStartIndex, length);
 
@@ -975,8 +978,8 @@ namespace NHibernate.SqlCommand
 			if (firstPartLength == maxSearchLength)
 			{
 				return part.Length == firstPartLength
-					? part.Content
-					: part.Content.Substring(firstPartOffset, firstPartLength);
+					? new StringBuilder(part.Content)
+					: new StringBuilder(part.Content.Substring(firstPartOffset, firstPartLength));
 			}
 
 			// Add (substring of) first part
@@ -999,7 +1002,11 @@ namespace NHibernate.SqlCommand
 				result.Append(part.Content, 0, maxSearchLength);
 			}
 
-			return result.ToString();
+			return result;
+		}
+		public string ToString(int startIndex, int length)
+		{
+			return ToStringBuilder(startIndex, length).ToString();
 		}
 
 		#endregion

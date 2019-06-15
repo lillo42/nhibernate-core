@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using Microsoft.Extensions.ObjectPool;
 using NHibernate.Engine;
 
 namespace NHibernate.Id
@@ -23,6 +24,7 @@ namespace NHibernate.Id
 	/// </remarks>
 	public partial class UUIDStringGenerator : IIdentifierGenerator
 	{
+		private static ObjectPool<PooledStringBuilder> s_pool = PooledStringBuilder.CreatePool(16, 16);
 		#region IIdentifierGenerator Members
 
 		/// <summary>
@@ -33,17 +35,17 @@ namespace NHibernate.Id
 		/// <returns>The new identifier as a <see cref="String"/>.</returns>
 		public object Generate(ISessionImplementor session, object obj)
 		{
-			StringBuilder guidBuilder = new StringBuilder(16, 16);
+			PooledStringBuilder guidBuilder = s_pool.Allocate();
 
 			byte[] guidInBytes = Guid.NewGuid().ToByteArray();
 
 			// add each item in Byte[] to the string builder
 			for (int i = 0; i < guidInBytes.Length; i++)
 			{
-				guidBuilder.Append((char) guidInBytes[i]);
+				guidBuilder.Builder.Append((char) guidInBytes[i]);
 			}
 
-			return guidBuilder.ToString();
+			return guidBuilder.ToStringAndFree();
 		}
 
 		#endregion

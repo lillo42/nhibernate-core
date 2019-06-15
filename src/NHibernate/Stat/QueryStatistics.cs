@@ -75,8 +75,7 @@ namespace NHibernate.Stat
 
 		public override string ToString()
 		{
-			var buf = PooledStringBuilder.GetInstance();
-			buf.Builder.Append("QueryStatistics[")
+			return new StringBuilder().Append("QueryStatistics[")
 				.Append("cacheHitCount=").Append(cacheHitCount)
 				.Append(",cacheMissCount=").Append(cacheMissCount)
 				.Append(",cachePutCount=").Append(cachePutCount)
@@ -85,8 +84,7 @@ namespace NHibernate.Stat
 				.Append(",executionAvgTime=").Append(executionAvgTime)
 				.Append(",executionMaxTime=").Append(executionMaxTime)
 				.Append(",executionMinTime=").Append(executionMinTime)
-				.Append(']');
-			return buf.ToStringAndFree();
+				.Append(']').ToString();
 		}
 	}
 }

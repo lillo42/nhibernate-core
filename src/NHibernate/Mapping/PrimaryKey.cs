@@ -20,18 +20,20 @@ namespace NHibernate.Mapping
 		/// </returns>
 		public string SqlConstraintString(Dialect.Dialect d, string defaultSchema)
 		{
-			StringBuilder buf = new StringBuilder(d.PrimaryKeyString + " (");
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append(d.PrimaryKeyString).Append(" (");
 			int i = 0;
 			foreach (Column col in ColumnIterator)
 			{
-				buf.Append(col.GetQuotedName(d));
+				buf.Builder.Append(col.GetQuotedName(d));
 				if (i < ColumnSpan - 1)
 				{
-					buf.Append(StringHelper.CommaSpace);
+					buf.Builder.Append(StringHelper.CommaSpace);
 				}
 				i++;
 			}
-			return buf.Append(StringHelper.ClosedParen).ToString();
+			buf.Builder.Append(StringHelper.ClosedParen);
+			return buf.ToStringAndFree();
 		}
 
 		/// <summary>
@@ -46,20 +48,21 @@ namespace NHibernate.Mapping
 		/// </returns>
 		public override string SqlConstraintString(Dialect.Dialect d, string constraintName, string defaultCatalog, string defaultSchema)
 		{
-			StringBuilder buf = new StringBuilder(
-				d.GetAddPrimaryKeyConstraintString(constraintName))
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append(d.GetAddPrimaryKeyConstraintString(constraintName))
 				.Append('(');
 			int i = 0;
 			foreach (Column col in ColumnIterator)
 			{
-				buf.Append(col.GetQuotedName(d));
+				buf.Builder.Append(col.GetQuotedName(d));
 				if (i < ColumnSpan - 1)
 				{
-					buf.Append(StringHelper.CommaSpace);
+					buf.Builder.Append(StringHelper.CommaSpace);
 				}
 				i++;
 			}
-			return buf.Append(StringHelper.ClosedParen).ToString();
+			buf.Builder.Append(StringHelper.ClosedParen);
+			return buf.ToStringAndFree();
 		}
 
 		#region IRelationalModel Members

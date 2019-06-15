@@ -1004,18 +1004,17 @@ namespace NHibernate.Mapping
 
 		public override string ToString()
 		{
-			var buf = PooledStringBuilder.GetInstance();
-			buf.Builder.Append(GetType().FullName).Append('(');
+			var buf = new StringBuilder().Append(GetType().FullName).Append('(');
 			if (Catalog != null)
 			{
-				buf.Builder.Append(Catalog + ".");
+				buf.Append(Catalog + ".");
 			}
 			if (Schema != null)
 			{
-				buf.Builder.Append(Schema + ".");
+				buf.Append(Schema + ".");
 			}
-			buf.Builder.Append(Name).Append(')');
-			return buf.ToStringAndFree();
+			buf.Append(Name).Append(')');
+			return buf.ToString();
 		}
 
 		public IEnumerable<string> ValidateColumns(Dialect.Dialect dialect, IMapping mapping, ITableMetadata tableInfo)

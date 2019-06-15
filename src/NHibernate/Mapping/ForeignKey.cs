@@ -194,8 +194,7 @@ namespace NHibernate.Mapping
 		{
 			if (!IsReferenceToPrimaryKey)
 			{
-				var result = PooledStringBuilder.GetInstance();;
-				result.Builder.Append(GetType().FullName)
+				return new StringBuilder().Append(GetType().FullName)
 					.Append('(')
 					.Append(Table.Name)
 					.Append(string.Join(", ", Columns))
@@ -203,8 +202,8 @@ namespace NHibernate.Mapping
 					.Append('(')
 					.Append(string.Join(", ", ReferencedColumns))
 					.Append(") as ")
-					.Append(Name);
-				return result.ToStringAndFree();
+					.Append(Name)
+					.ToString();
 			}
 
 			return base.ToString();

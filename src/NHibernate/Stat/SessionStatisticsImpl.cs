@@ -49,12 +49,12 @@ namespace NHibernate.Stat
 
 		public override string ToString()
 		{
-			var buf = PooledStringBuilder.GetInstance();
-			buf.Builder.Append("SessionStatistics[")
+			return new StringBuilder()
+				.Append("SessionStatistics[")
 				.Append("entity count=").Append(EntityCount)
 				.Append("collection count=").Append(CollectionCount)
-				.Append(']');
-			return buf.ToStringAndFree();
+				.Append(']')
+				.ToString();
 		}
 	}
 }

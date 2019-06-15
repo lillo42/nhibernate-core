@@ -27,7 +27,7 @@ namespace NHibernate.Action
 			List<string> tmpSpaces = new List<string>();
 			for (int i = 0; i < affectedQueryables.Length; i++)
 			{
-				if (affectedQueryables[i].HasCache)
+				if (affectedQueryables[i].HasCache)	
 				{
 					affectedEntityNames.Add(affectedQueryables[i].EntityName);
 				}

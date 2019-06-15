@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Extensions.ObjectPool;
 using NHibernate.Util;
 
 namespace NHibernate.AdoNet.Util
@@ -37,13 +38,17 @@ namespace NHibernate.AdoNet.Util
 			}
 		}
 
+
+		private static ObjectPool<PooledStringBuilder> _pool = PooledStringBuilder.CreatePool(60, 32);
+
 		protected virtual string FormatCommentOn(string sql)
 		{
-			var result = new StringBuilder(60).Append(Indent1);
+			var result = _pool.Allocate();
+			result.Builder.Append(Indent1);
 			var quoted = false;
 			foreach (var token in new StringTokenizer(sql, " '[]\"", true))
 			{
-				result.Append(token);
+				result.Builder.Append(token);
 				if (IsQuote(token))
 				{
 					quoted = !quoted;
@@ -52,17 +57,18 @@ namespace NHibernate.AdoNet.Util
 				{
 					if ("is".Equals(token))
 					{
-						result.Append(Indent2);
+						result.Builder.Append(Indent2);
 					}
 				}
 			}
 
-			return result.ToString();
+			return result.ToStringAndFree();
 		}
 
 		protected virtual string FormatAlterTable(string sql)
 		{
-			var result = new StringBuilder(60).Append(Indent1);
+			var result = _pool.Allocate();
+			result.Builder.Append(Indent1);
 			var quoted = false;
 			foreach (var token in new StringTokenizer(sql, " (,)'[]\"", true))
 			{
@@ -74,18 +80,19 @@ namespace NHibernate.AdoNet.Util
 				{
 					if (IsBreak(token))
 					{
-						result.Append(Indent3);
+						result.Builder.Append(Indent3);
 					}
 				}
-				result.Append(token);
+				result.Builder.Append(token);
 			}
 
-			return result.ToString();
+			return result.ToStringAndFree();
 		}
 
 		protected virtual string FormatCreateTable(string sql)
 		{
-			var result = new StringBuilder(60).Append(Indent1);
+			var result = _pool.Allocate();
+			result.Builder.Append(Indent1);
 			var depth = 0;
 			var quoted = false;
 			foreach (var token in new StringTokenizer(sql, "(,)'[]\"", true))
@@ -93,11 +100,11 @@ namespace NHibernate.AdoNet.Util
 				if (IsQuote(token))
 				{
 					quoted = !quoted;
-					result.Append(token);
+					result.Builder.Append(token);
 				}
 				else if (quoted)
 				{
-					result.Append(token);
+					result.Builder.Append(token);
 				}
 				else
 				{
@@ -106,26 +113,26 @@ namespace NHibernate.AdoNet.Util
 						depth--;
 						if (depth == 0)
 						{
-							result.Append(Indent1);
+							result.Builder.Append(Indent1);
 						}
 					}
-					result.Append(token);
+					result.Builder.Append(token);
 					if (",".Equals(token) && depth == 1)
 					{
-						result.Append(Indent2);
+						result.Builder.Append(Indent2);
 					}
 					if ("(".Equals(token))
 					{
 						depth++;
 						if (depth == 1)
 						{
-							result.Append(Indent3);
+							result.Builder.Append(Indent3);
 						}
 					}
 				}
 			}
 
-			return result.ToString();
+			return result.ToStringAndFree();
 		}
 
 		private static bool IsBreak(string token)

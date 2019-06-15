@@ -457,9 +457,7 @@ namespace NHibernate.Engine
 		public override string ToString()
 		{
 			// todo-events : use the helper for the collections
-			var buf = PooledStringBuilder.GetInstance();
-			
-			buf.Builder
+			return new StringBuilder()
 				.Append("ActionQueue[insertions=")
 				.Append(insertions)
 				.Append(" updates=")
@@ -472,8 +470,8 @@ namespace NHibernate.Engine
 				.Append(collectionRemovals)
 				.Append(" collectionUpdates=")
 				.Append(collectionUpdates)
-				.Append("]");
-			return buf.ToStringAndFree();
+				.Append("]")
+				.ToString();
 		}
 		
 		[Serializable]

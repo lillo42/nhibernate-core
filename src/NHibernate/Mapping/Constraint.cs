@@ -56,22 +56,23 @@ namespace NHibernate.Mapping
 		{
 			// Use a concatenation that guarantees uniqueness, even if identical names
 			// exist between all table and column identifiers.
-			var sb = new StringBuilder("table`").Append(table.Name).Append("`");
+			var sb = PooledStringBuilder.GetInstance();
+			sb.Builder.Append("table`").Append(table.Name).Append("`");
 			if (referencedTable != null)
-				sb.Append("references`").Append(referencedTable.Name).Append("`");
+				sb.Builder.Append("references`").Append(referencedTable.Name).Append("`");
 
 			// Ensure a consistent ordering of columns, regardless of the order
 			// they were bound.
 			foreach (var column in columns.OrderBy(c => c.CanonicalName))
 			{
-				sb.Append("column`").Append(column.CanonicalName).Append("`");
+				sb.Builder.Append("column`").Append(column.CanonicalName).Append("`");
 			}
 			// Hash the generated name for avoiding collisions with user choosen names.
 			// This is not 100% reliable, as hashing may still have a chance of generating
 			// collisions.
 			// Hibernate uses MD5 here, which .Net standrad implementation is rejected by
 			// FIPS enabled machine. Better use a non-cryptographic hash.
-			var name = prefix + Hasher.HashToString(sb.ToString());
+			var name = prefix + Hasher.HashToString(sb.ToStringAndFree());
 
 			return name;
 		}

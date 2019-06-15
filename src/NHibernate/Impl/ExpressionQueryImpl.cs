@@ -86,18 +86,19 @@ namespace NHibernate.Impl
 			// This is not much an issue anymore: ExpressionQueryImpl are currently created only with NhLinqExpression
 			// which do cache their translation.
 			var newTree = ParameterExpander.Expand(QueryExpression.Translate(Session.Factory, _isFilter), map);
-			var key = new StringBuilder(QueryExpression.Key);
+			var key = PooledStringBuilder.GetInstance();
+			key.Builder.Append(QueryExpression.Key);
 
 			foreach (var pair in map)
 			{
-				key.Append(' ');
-				key.Append(pair.Key);
-				key.Append(':');
+				key.Builder.Append(' ');
+				key.Builder.Append(pair.Key);
+				key.Builder.Append(':');
 				foreach (var s in pair.Value)
-					key.Append(s);
+					key.Builder.Append(s);
 			}
 
-			return new ExpandedQueryExpression(QueryExpression, newTree, key.ToString());
+			return new ExpandedQueryExpression(QueryExpression, newTree, key.ToStringAndFree());
 		}
 	}
 

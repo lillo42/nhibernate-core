@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using Microsoft.Extensions.ObjectPool;
 using NHibernate.Engine;
 using NHibernate.Type;
 using NHibernate.Util;
@@ -27,15 +28,18 @@ namespace NHibernate.Hql
 			return columnNames;
 		}
 
+		private static ObjectPool<PooledStringBuilder> _pool = PooledStringBuilder.CreatePool(16, 32);
 		public static string ScalarName(int x, int y)
 		{
-			return new StringBuilder(16)
+			var buf = _pool.Allocate();
+			buf.Builder
 				.Append("col_")
 				.Append(x)
 				.Append(StringHelper.Underscore)
 				.Append(y)
-				.Append(StringHelper.Underscore)
-				.ToString();
+				.Append(StringHelper.Underscore);
+
+			return buf.ToStringAndFree();
 		}
 	}
 }

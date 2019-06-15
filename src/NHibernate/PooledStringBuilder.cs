@@ -17,13 +17,27 @@ namespace NHibernate
 	/// </summary>
 	internal sealed class PooledStringBuilder
 	{
-		public readonly StringBuilder Builder = new StringBuilder();
+		public readonly StringBuilder Builder;
 		private readonly ObjectPool<PooledStringBuilder> _pool;
 
 		private PooledStringBuilder(ObjectPool<PooledStringBuilder> pool)
 		{
 			_pool = pool;
+			Builder = new StringBuilder();
 		}
+		
+		private PooledStringBuilder(int capacity, ObjectPool<PooledStringBuilder> pool)
+		{
+			_pool = pool;
+			Builder = new StringBuilder(capacity);
+		}
+		
+		private PooledStringBuilder(int capacity, int maxCapacity, ObjectPool<PooledStringBuilder> pool)
+		{
+			_pool = pool;
+			Builder = new StringBuilder(capacity, maxCapacity);
+		}
+
 
 		public int Length => Builder.Length;
 
@@ -51,7 +65,7 @@ namespace NHibernate
 		}
 
 		// global pool
-		private static readonly ObjectPool<PooledStringBuilder> s_poolInstance = CreatePool();
+		private static readonly ObjectPool<PooledStringBuilder> s_poolInstance = CreatePool(64);
 
 		// if someone needs to create a private pool;
 		/// <summary>
@@ -60,6 +74,35 @@ namespace NHibernate
 		/// <param name="size">The size of the pool.</param>
 		/// <returns></returns>
 		public static ObjectPool<PooledStringBuilder> CreatePool(int size = 32)
+		{
+			ObjectPool<PooledStringBuilder> pool = null;
+			pool = new ObjectPool<PooledStringBuilder>(() => new PooledStringBuilder(pool), size);
+			return pool;
+		}
+		
+		// if someone needs to create a private pool;
+		/// <summary>
+		/// If someone need to create a private pool
+		/// </summary>
+		/// <param name="size">The size of the pool.</param>
+		/// <param name="capacity"></param>
+		/// <returns></returns>
+		public static ObjectPool<PooledStringBuilder> CreatePool(int capacity, int size)
+		{
+			ObjectPool<PooledStringBuilder> pool = null;
+			pool = new ObjectPool<PooledStringBuilder>(() => new PooledStringBuilder(capacity, pool), size);
+			return pool;
+		}
+		
+		// if someone needs to create a private pool;
+		/// <summary>
+		/// If someone need to create a private pool
+		/// </summary>
+		/// <param name="size">The size of the pool.</param>
+		/// <param name="capacity"></param>
+		/// <param name="maxCapacity"></param>
+		/// <returns></returns>
+		public static ObjectPool<PooledStringBuilder> CreatePool(int capacity, int maxCapacity, int size)
 		{
 			ObjectPool<PooledStringBuilder> pool = null;
 			pool = new ObjectPool<PooledStringBuilder>(() => new PooledStringBuilder(pool), size);

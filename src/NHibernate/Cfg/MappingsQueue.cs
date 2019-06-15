@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Extensions.ObjectPool;
 
 namespace NHibernate.Cfg
 {
@@ -10,6 +11,7 @@ namespace NHibernate.Cfg
 	/// </summary>
 	public class MappingsQueue
 	{
+		private static ObjectPool<PooledStringBuilder> _pool = PooledStringBuilder.CreatePool(500, 32);
 		private readonly Queue availableEntries = new Queue();
 		private readonly HashSet<string> processedClassNames = new HashSet<string>();
 
@@ -98,15 +100,15 @@ namespace NHibernate.Cfg
 
 		private static string FormatExceptionMessage(IEnumerable<MappingsQueueEntry> resourceEntries)
 		{
-			var message = new StringBuilder(500);
-			message.Append("These classes referenced by 'extends' were not found:");
+			var message = _pool.Allocate();
+			message.Builder.Append("These classes referenced by 'extends' were not found:");
 			foreach (MappingsQueueEntry.RequiredEntityName className in
 				resourceEntries.SelectMany(resourceEntry => resourceEntry.RequiredClassNames))
 			{
-				message.Append('\n').Append(className);
+				message.Builder.Append('\n').Append(className);
 			}
 
-			return message.ToString();
+			return message.ToStringAndFree();
 		}
 	}
 }

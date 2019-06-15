@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using Microsoft.Extensions.ObjectPool;
 using NHibernate.Cache;
 using NHibernate.Engine;
 using NHibernate.Mapping;
@@ -17,6 +18,7 @@ namespace NHibernate.Persister.Entity
 	/// </summary>
 	public class SingleTableEntityPersister : AbstractEntityPersister, IQueryable
 	{
+		private static ObjectPool<PooledStringBuilder> _pool = PooledStringBuilder.CreatePool(50, 32);
 		// the class hierarchy structure
 		private readonly int joinSpan;
 		private IType[] identifierTypes;
@@ -647,9 +649,11 @@ possible solutions:
 				{
 					throw new NotSupportedException(string.Format(abstractClassWithNoSubclassExceptionMessageTemplate, subclasses[0]));
 				}
-				StringBuilder buf = new StringBuilder(50).Append(" and ").Append(frag.ToFragmentString().ToString());
 
-				return buf.ToString();
+				var buf = _pool.Allocate();
+				buf.Builder.Append(" and ").Append(frag.ToFragmentString().ToString());
+
+				return buf.ToStringAndFree();
 			}
 			else
 			{

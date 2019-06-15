@@ -318,7 +318,8 @@ namespace NHibernate.Persister.Entity
 												   .Where(table => !table.IsAbstractUnionTable)
 												   .SelectMany(table => table.ColumnIterator));
 
-			var buf = new StringBuilder("( ");
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append("( ");
 
 			var persistentClasses = PersistentClasses(model);
 			foreach (var clazz in persistentClasses)
@@ -326,32 +327,33 @@ namespace NHibernate.Persister.Entity
 				var table = clazz.Table;
 				if (!table.IsAbstractUnionTable)
 				{
-					buf.Append("select ");
+					buf.Builder.Append("select ");
 					foreach (var col in columns)
 					{
 						if (!table.ContainsColumn(col))
 						{
 							var sqlType = col.GetSqlTypeCode(mapping);
-							buf.Append(dialect.GetSelectClauseNullString(sqlType)).Append(" as ");
+							buf.Builder.Append(dialect.GetSelectClauseNullString(sqlType)).Append(" as ");
 						}
-						buf.Append(col.GetQuotedName(dialect));
-						buf.Append(StringHelper.CommaSpace);
+						buf.Builder.Append(col.GetQuotedName(dialect));
+						buf.Builder.Append(StringHelper.CommaSpace);
 					}
-					buf.Append(clazz.SubclassId).Append(" as clazz_");
-					buf.Append(" from ").Append(table.GetQualifiedName(dialect, settings.DefaultCatalogName, settings.DefaultSchemaName));
-					buf.Append(" union ");
+					buf.Builder.Append(clazz.SubclassId).Append(" as clazz_");
+					buf.Builder.Append(" from ").Append(table.GetQualifiedName(dialect, settings.DefaultCatalogName, settings.DefaultSchemaName));
+					buf.Builder.Append(" union ");
 					if (dialect.SupportsUnionAll)
-						buf.Append("all ");
+						buf.Builder.Append("all ");
 				}
 			}
 
 			if (buf.Length > 2)
 			{
 				//chop the last union (all)
-				buf.Length -= (dialect.SupportsUnionAll ? 11 : 7); //" union " : "all "
+				buf.Builder.Length -= (dialect.SupportsUnionAll ? 11 : 7); //" union " : "all "
 			}
 
-			return buf.Append(" )").ToString();
+			buf.Builder.Append(" )");
+			return buf.ToStringAndFree();
 		}
 
 		private static IEnumerable<PersistentClass> PersistentClasses(PersistentClass model)

@@ -290,7 +290,7 @@ namespace NHibernate.Dialect
 		{
 			// TODO:  merge additional lockoptions support in Dialect.applyLocksToSql
 
-			var buffer = new StringBuilder(sql.ToString());
+			var buffer = sql.ToStringBuilder();
 			int correction = 0;
 			
 			foreach (KeyValuePair<string, LockMode> entry in aliasedLockModes)

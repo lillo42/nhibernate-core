@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Extensions.ObjectPool;
 using NHibernate.Engine;
 using NHibernate.Hql.Util;
 using NHibernate.Util;
@@ -9,6 +10,7 @@ namespace NHibernate.Hql
 {
 	public class QuerySplitter
 	{
+		private static ObjectPool<PooledStringBuilder> _pool = PooledStringBuilder.CreatePool(40, 32);
 		private static readonly INHibernateLogger log = NHibernateLogger.For(typeof(QuerySplitter));
 
 		private static readonly HashSet<string> beforeClassTokens = new HashSet<string>();
@@ -53,13 +55,13 @@ namespace NHibernate.Hql
 			}
 			var placeholders = new List<object>();
 			var replacements = new List<object>();
-			StringBuilder templateQuery = new StringBuilder(40);
+			var templateQuery = _pool.Allocate();
 			int count = 0;
 			string last = null;
 			int nextIndex = 0;
 			string next = null;
 
-			templateQuery.Append(tokens[0]);
+			templateQuery.Builder.Append(tokens[0]);
 
 			for (int i = 1; i < tokens.Length; i++)
 			{
@@ -106,10 +108,10 @@ namespace NHibernate.Hql
 						}
 					}
 				}
-				templateQuery.Append(token);
+				templateQuery.Builder.Append(token);
 			}
 			string[] results =
-				StringHelper.Multiply(templateQuery.ToString(), placeholders, replacements);
+				StringHelper.Multiply(templateQuery.ToStringAndFree(), placeholders, replacements);
 			if (results.Length == 0)
 			{
 				log.Warn("no persistent classes found for query class: {0}", query);

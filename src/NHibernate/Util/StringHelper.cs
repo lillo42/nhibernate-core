@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Extensions.ObjectPool;
 
 
 namespace NHibernate.Util
@@ -10,6 +11,7 @@ namespace NHibernate.Util
 	/// <summary></summary>
 	public static class StringHelper
 	{
+		private static ObjectPool<PooledStringBuilder> s_pool = PooledStringBuilder.CreatePool();
 		/// <summary>
 		/// This allows for both CRLF and lone LF line separators.
 		/// </summary>
@@ -47,7 +49,7 @@ namespace NHibernate.Util
 		[Obsolete("Please use string.Join instead")]
 		public static string Join(string separator, IEnumerable objects)
 		{
-			var buf = PooledStringBuilder.GetInstance();
+			var buf = s_pool.Allocate();
 			bool first = true;
 
 			foreach (object obj in objects)
@@ -124,10 +126,11 @@ namespace NHibernate.Util
 					}
 				}
 
-				return new StringBuilder(template.Substring(0, loc))
+				var builder = s_pool.Allocate();
+				builder.Builder.Append(template.Substring(0, loc))
 					.Append(replaceWith)
-					.Append(ReplaceByPredicate(template.Substring(loc + placeholder.Length), placeholder, replacement, useWholeWord, isWholeWord))
-					.ToString();
+					.Append(ReplaceByPredicate(template.Substring(loc + placeholder.Length), placeholder, replacement, useWholeWord, isWholeWord));
+				return builder.ToStringAndFree();
 			}
 		}
 
@@ -155,10 +158,11 @@ namespace NHibernate.Util
 			}
 			else
 			{
-				return new StringBuilder(template.Substring(0, loc))
+				var builder = s_pool.Allocate();
+				builder.Builder.Append(template.Substring(0, loc))
 					.Append(replacement)
-					.Append(template.Substring(loc + placeholder.Length))
-					.ToString();
+					.Append(template.Substring(loc + placeholder.Length));
+				 return builder.ToStringAndFree();
 			}
 		}
 
@@ -763,7 +767,7 @@ namespace NHibernate.Util
 
 		public static string CollectionToString(IEnumerable keys)
 		{
-			var sb = PooledStringBuilder.GetInstance();
+			var sb = s_pool.Allocate();
 			foreach (object o in keys)
 			{
 				sb.Builder.Append(o);
