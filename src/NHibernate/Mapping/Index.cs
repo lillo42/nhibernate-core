@@ -21,7 +21,8 @@ namespace NHibernate.Mapping
 			IEnumerable<Column> columns, bool unique, string defaultCatalog, string defaultSchema)
 		{
 			//TODO handle supportsNotNullUnique=false, but such a case does not exist in the wild so far
-			StringBuilder buf = new StringBuilder("create")
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append("create")
 				.Append(unique ? " unique" : "")
 				.Append(" index ")
 				.Append(dialect.QualifyIndexName ? name : StringHelper.Unqualify(name))
@@ -32,14 +33,14 @@ namespace NHibernate.Mapping
 			foreach (Column column in columns)
 			{
 				if (commaNeeded)
-					buf.Append(StringHelper.CommaSpace);
+					buf.Builder.Append(StringHelper.CommaSpace);
 				commaNeeded = true;
 
-				buf.Append(column.GetQuotedName(dialect));
+				buf.Builder.Append(column.GetQuotedName(dialect));
 			}
-			buf.Append(")");
+			buf.Builder.Append(")");
 
-			return buf.ToString();
+			return buf.ToStringAndFree();
 		}
 
 		public static string BuildSqlDropIndexString(Dialect.Dialect dialect, Table table, string name, string defaultCatalog, string defaultSchema)

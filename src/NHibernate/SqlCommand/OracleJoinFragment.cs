@@ -64,19 +64,20 @@ namespace NHibernate.SqlCommand
 		/// </summary>
 		private void AddLeftOuterJoinCondition(SqlString on)
 		{
-			StringBuilder buf = new StringBuilder(on.ToString());
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append(@on);
 			for (int i = 0; i < buf.Length; i++)
 			{
-				char character = buf[i];
+				char character = buf.Builder[i];
 				bool isInsertPoint = Operators.Contains(character) ||
-									 (character == ' ' && buf.Length > i + 3 && "is ".Equals(buf.ToString(i + 1, 3)));
+									 (character == ' ' && buf.Length > i + 3 && "is ".Equals(buf.Builder.ToString(i + 1, 3)));
 				if (isInsertPoint)
 				{
-					buf.Insert(i, "(+)");
+					buf.Builder.Insert(i, "(+)");
 					i += 3;
 				}
 			}
-			AddCondition(SqlString.Parse(buf.ToString()));
+			AddCondition(SqlString.Parse(buf.ToStringAndFree()));
 		}
 
 		private static readonly HashSet<char> Operators = new HashSet<char>();

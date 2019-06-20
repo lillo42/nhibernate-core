@@ -11,7 +11,10 @@ namespace NHibernate.Util
 	/// <summary></summary>
 	public static class StringHelper
 	{
-		private static ObjectPool<PooledStringBuilder> s_pool = PooledStringBuilder.CreatePool();
+		private static ObjectPool<PooledStringBuilder> _pool = PooledStringBuilder.CreatePool();
+		private static ObjectPool<PooledStringBuilder> _pool200 = PooledStringBuilder.CreatePool(200, 16);
+		
+		
 		/// <summary>
 		/// This allows for both CRLF and lone LF line separators.
 		/// </summary>
@@ -49,7 +52,7 @@ namespace NHibernate.Util
 		[Obsolete("Please use string.Join instead")]
 		public static string Join(string separator, IEnumerable objects)
 		{
-			var buf = s_pool.Allocate();
+			var buf = _pool.Allocate();
 			bool first = true;
 
 			foreach (object obj in objects)
@@ -126,7 +129,7 @@ namespace NHibernate.Util
 					}
 				}
 
-				var builder = s_pool.Allocate();
+				var builder = _pool.Allocate();
 				builder.Builder.Append(template.Substring(0, loc))
 					.Append(replaceWith)
 					.Append(ReplaceByPredicate(template.Substring(loc + placeholder.Length), placeholder, replacement, useWholeWord, isWholeWord));
@@ -158,7 +161,7 @@ namespace NHibernate.Util
 			}
 			else
 			{
-				var builder = s_pool.Allocate();
+				var builder = _pool.Allocate();
 				builder.Builder.Append(template.Substring(0, loc))
 					.Append(replacement)
 					.Append(template.Substring(loc + placeholder.Length));
@@ -435,9 +438,9 @@ namespace NHibernate.Util
 			{
 				return text[0];
 			}
-			var sb = new StringBuilder(200);
-			Array.ForEach(text, t => sb.AppendLine(t));
-			return sb.ToString();
+			var sb = _pool200.Allocate();
+			Array.ForEach(text, t => sb.Builder.AppendLine(t));
+			return sb.ToStringAndFree();
 		}
 
 		/// <summary>
@@ -767,7 +770,7 @@ namespace NHibernate.Util
 
 		public static string CollectionToString(IEnumerable keys)
 		{
-			var sb = s_pool.Allocate();
+			var sb = _pool.Allocate();
 			foreach (object o in keys)
 			{
 				sb.Builder.Append(o);

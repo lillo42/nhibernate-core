@@ -41,6 +41,18 @@ namespace NHibernate
 
 		public int Length => Builder.Length;
 
+		public PooledStringBuilder Append(string text)
+		{
+			Builder.Append(text);
+			return this;
+		}
+		
+		public PooledStringBuilder Append(char text)
+		{
+			Builder.Append(text);
+			return this;
+		}
+
 		public void Free()
 		{
 			StringBuilder builder = Builder;

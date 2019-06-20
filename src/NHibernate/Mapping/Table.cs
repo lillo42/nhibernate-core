@@ -348,8 +348,8 @@ namespace NHibernate.Mapping
 		/// </returns>
 		public string SqlCreateString(Dialect.Dialect dialect, IMapping p, string defaultCatalog, string defaultSchema)
 		{
-			StringBuilder buf =
-				new StringBuilder(HasPrimaryKey ? dialect.CreateTableString : dialect.CreateMultisetTableString).Append(' ').Append(
+			var buf = PooledStringBuilder.GetInstance();
+				buf.Builder.Append(HasPrimaryKey ? dialect.CreateTableString : dialect.CreateMultisetTableString).Append(' ').Append(
 					GetQualifiedName(dialect, defaultCatalog, defaultSchema)).Append(" (");
 
 			bool identityColumn = idValue != null && idValue.IsIdentityColumn(dialect);
@@ -468,7 +468,7 @@ namespace NHibernate.Mapping
 			}
 			buf.Append(dialect.TableTypeString);
 
-			return buf.ToString();
+			return buf.ToStringAndFree();
 		}
 
 		/// <summary>

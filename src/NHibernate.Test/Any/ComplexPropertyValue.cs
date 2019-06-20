@@ -31,7 +31,7 @@ namespace NHibernate.Test.Any
 
 		private string KeyString()
 		{
-			StringBuilder buff = new StringBuilder();
+			var buff = new StringBuilder();
 			foreach (object key in subProperties.Keys)
 			{
 				if (buff.Length > 0)

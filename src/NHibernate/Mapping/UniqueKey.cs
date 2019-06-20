@@ -18,7 +18,8 @@ namespace NHibernate.Mapping
 		/// <returns> A string that contains the SQL to create the Unique Key Constraint. </returns>
 		public string SqlConstraintString(Dialect.Dialect dialect)
 		{
-			StringBuilder buf = new StringBuilder("unique (");
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append("unique (");
 			bool commaNeeded = false;
 			bool nullable = false;
 			foreach (Column column in ColumnIterator)
@@ -27,12 +28,12 @@ namespace NHibernate.Mapping
 					nullable = true;
 
 				if (commaNeeded)
-					buf.Append(StringHelper.CommaSpace);
+					buf.Builder.Append(StringHelper.CommaSpace);
 				commaNeeded = true;
-				buf.Append(column.GetQuotedName(dialect));
+				buf.Builder.Append(column.GetQuotedName(dialect));
 			}
 			//do not add unique constraint on DB not supporting unique and nullable columns
-			return !nullable || dialect.SupportsNullInUnique ? buf.Append(StringHelper.ClosedParen).ToString() : null;
+			return !nullable || dialect.SupportsNullInUnique ? buf.Builder.Append(StringHelper.ClosedParen).ToString() : null;
 		}
 
 		/// <summary>
@@ -47,7 +48,8 @@ namespace NHibernate.Mapping
 		/// </returns>
 		public override string SqlConstraintString(Dialect.Dialect dialect, string constraintName, string defaultCatalog, string defaultSchema)
 		{
-			StringBuilder buf = new StringBuilder(dialect.GetAddPrimaryKeyConstraintString(constraintName))
+			var buf = PooledStringBuilder.GetInstance();
+			buf.Builder.Append(dialect.GetAddPrimaryKeyConstraintString(constraintName))
 				.Append(StringHelper.OpenParen);
 
 			bool commaNeeded = false;
@@ -57,14 +59,18 @@ namespace NHibernate.Mapping
 				if (!nullable && column.IsNullable)
 					nullable = true;
 				if (commaNeeded)
-					buf.Append(StringHelper.CommaSpace);
+					buf.Builder.Append(StringHelper.CommaSpace);
 				commaNeeded = true;
-				buf.Append(column.GetQuotedName(dialect));
+				buf.Builder.Append(column.GetQuotedName(dialect));
 			}
 
-			return !nullable || dialect.SupportsNullInUnique
-				? buf.Append(StringHelper.ClosedParen).Replace("primary key", "unique").ToString()
-				: null;
+			if (!nullable || dialect.SupportsNullInUnique)
+			{
+				buf.Builder.Append(StringHelper.ClosedParen).Replace("primary key", "unique");
+				return buf.ToStringAndFree();
+			}
+
+			return null;
 		}
 
 		public override string SqlCreateString(Dialect.Dialect dialect, IMapping p, string defaultCatalog, string defaultSchema)

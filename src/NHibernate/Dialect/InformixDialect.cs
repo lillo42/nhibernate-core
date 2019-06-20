@@ -437,6 +437,7 @@ namespace NHibernate.Dialect
 
 		public override string GetAddForeignKeyConstraintString(string constraintName, string[] foreignKey, string referencedTable, string[] primaryKey, bool referencesPrimaryKey)
 		{
+			PooledStringBuilder.GetInstance()
 			// NH-2026
 			var res = new StringBuilder(200);
 
